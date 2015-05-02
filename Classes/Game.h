@@ -9,9 +9,17 @@ class GameScene : public cocos2d::Layer
 {
 private:
 	cocos2d::TMXTiledMap *map;
-	cocos2d::TMXLayer *floor;
+
 	cocos2d::TMXLayer *wall;
+	cocos2d::TMXLayer *openDoor;
+	cocos2d::TMXLayer *closedDoor;
 public:
+
+	cocos2d::Sprite *character;
+	cocos2d::EventKeyboard::KeyCode currentKey;
+
+	int running;
+
     // there's no 'id' in cpp, so we recommend returning the class instance pointer
     static cocos2d::Scene* createScene();
 
@@ -25,20 +33,30 @@ public:
 
 	void keyboardSupport();
 
-	void setViewPointCenter(cocos2d::Point position);
+	void centerProcessingMove(EventKeyboard::KeyCode keyCode, float dt);
 
-	void safetyCheck();
+	void setViewPointCenter(cocos2d::Point position);
 
 	void update(float dt);
 
-	void setPlayerPosition(Point position);
+	void updtMoving(float dt);
+
+	void updtDoor(float dt);
+
+	void addEnemyAtPos(Point position);
+
+	void enemyMoveFinished(Node *pSender);
+
+	void animateEnemy(Sprite *enemy);
+
+	bool safetyCheck(Point position);
+
+	bool collision(Point position, EventKeyboard::KeyCode keyCode);
 
 	Point tileCoordForPosition(Point position);
     
     // implement the "static create()" method manually
 	CREATE_FUNC(GameScene);
-
-	cocos2d::Sprite *character;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

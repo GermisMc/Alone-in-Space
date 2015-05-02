@@ -2,7 +2,6 @@
 #include "SimpleaudioEngine.h"
 
 USING_NS_CC;
-using namespace cocos2d;
 
 Scene* GameScene::createScene()
 {
@@ -40,14 +39,25 @@ bool GameScene::init()
 
 	// Create tile map
 	map = TMXTiledMap::create("map/map.tmx");
-	floor = map->getLayer("floor");
 	wall = map->getLayer("wall");
+	openDoor = map->getLayer("open_door");
+	openDoor->setLocalZOrder(20);
+	closedDoor = map->getLayer("closed_door");
 
 	this->addChild(map);
+	map->addChild(character, 10);
 
+	// Create objects 
 	TMXObjectGroup *objectGroup = map->getObjectGroup("Objects");
 
-	CCASSERT(NULL != objectGroup, "'Objects' object group not found");
+	for (auto& eSpawnPoint : objectGroup->getObjects()) {
+		ValueMap& dict = eSpawnPoint.asValueMap();
+		if (dict["Enemy"].asInt() == 1) {
+			int x = dict["x"].asInt();
+			int y = dict["y"].asInt();
+			this->addEnemyAtPos(Point(x, y));
+		}
+	}
 
 	auto spawnPoint = objectGroup->getObject("SpawnPoint");
 
@@ -55,20 +65,57 @@ bool GameScene::init()
 	int y = spawnPoint["y"].asInt();
 	
 	character->setPosition(x + map->getTileSize().width / 2, y + map->getTileSize().height / 2);
-	addChild(character);
 
 	this->scheduleUpdate();
 
 	GameScene::keyboardSupport();
-	
+
 	return true;
 }
 
 void GameScene::update(float dt) {
 
 	GameScene::setViewPointCenter(character->getPosition());
-	GameScene::safetyCheck();
-	GameScene::setPlayerPosition(character->getPosition());
+}
+
+void GameScene::updtMoving(float dt) {
+
+	GameScene::centerProcessingMove(currentKey, dt);
+}
+
+void GameScene::addEnemyAtPos(Point position) {
+
+	auto enemy = Sprite::create("characters/enemy2.png");
+	enemy->setPosition(position);
+	this->animateEnemy(enemy);
+	map->addChild(enemy, 10);
+}
+
+void GameScene::enemyMoveFinished(Node *pSender) {
+
+	Sprite *enemy = (Sprite *)pSender;
+	this->animateEnemy(enemy);
+}
+
+void GameScene::animateEnemy(Sprite *enemy) {
+
+	auto actionTo1 = RotateTo::create(0, 0, 180);
+	auto actionTo2 = RotateTo::create(0, 0, 0);
+	auto diff = Point(character->getPosition() - enemy->getPosition());
+	if (diff.x < 0) {
+		enemy->runAction(actionTo2);
+	}
+	if (diff.x > 0) {
+		enemy->runAction(actionTo1);
+	}
+
+	float actualDuration = 0.3f;
+	auto position = (character->getPosition() - enemy->getPosition());
+	position.normalize();
+	auto actionMove = JumpBy::create(actualDuration, position.operator*(10), 10, 1);
+	auto actionMoveDone = CallFuncN::create(CC_CALLBACK_1(GameScene::enemyMoveFinished, this));
+
+	enemy->runAction(Sequence::create(actionMove, actionMoveDone, NULL));
 }
 
 void GameScene::setViewPointCenter(Point position) {
@@ -87,17 +134,17 @@ void GameScene::setViewPointCenter(Point position) {
 	this->setPosition(viewPoint);
 }
 
-void GameScene::safetyCheck() {
+bool GameScene::safetyCheck(Point position) {
 
-	Point playerPos = character->getPosition();
-
-	if (!(playerPos.x <= (map->getMapSize().width * map->getTileSize().width) &&
-		playerPos.y <= (map->getMapSize().height * map->getTileSize().height) &&
-		playerPos.y >= 0 &&
-		playerPos.x >= 0))
+	if ((position.x < (map->getMapSize().width * map->getTileSize().width) - 12 &&
+		position.y < (map->getMapSize().height * map->getTileSize().height) - 12 &&
+		position.y > 18 &&
+		position.x > 12))
 	{
+		return true;
 		//character->setPosition((map->getMapSize().width * map->getTileSize().width) - playerPos.x, (map->getMapSize().height * map->getTileSize().height) - playerPos.y);
-		character->stopAllActions;
+	} else {
+		return false;
 	}
 }
 
@@ -132,89 +179,120 @@ void GameScene::movAnim(char *anim_direct, char *start_anim, int frames_num)  {
 	//character->setPosition(Point((visibleSize.width / 2) + origin.x, (visibleSize.height / 2) + origin.y));
 }
 
+void GameScene::centerProcessingMove(EventKeyboard::KeyCode keyCode, float dt) {
+
+	const int speed = 100;
+
+	Point nextCoord;
+	Point position = character->getPosition();
+
+	bool isNotCrossBorder;
+	bool isNotCollide;
+
+	switch (keyCode) {
+	case EventKeyboard::KeyCode::KEY_A:
+		nextCoord.x = position.x - speed * dt;
+		nextCoord.y = position.y;
+		isNotCrossBorder = GameScene::safetyCheck(nextCoord);
+		isNotCollide = GameScene::collision(position, EventKeyboard::KeyCode::KEY_A);
+		break;
+	case EventKeyboard::KeyCode::KEY_D:
+		nextCoord.x = position.x + speed * dt;
+		nextCoord.y = position.y;
+		isNotCrossBorder = GameScene::safetyCheck(nextCoord);
+		isNotCollide = GameScene::collision(position, EventKeyboard::KeyCode::KEY_D);
+		break;
+	case EventKeyboard::KeyCode::KEY_W:
+		nextCoord.x = position.x;
+		nextCoord.y = position.y + speed * dt;
+		isNotCrossBorder = GameScene::safetyCheck(nextCoord);
+		isNotCollide = GameScene::collision(position, EventKeyboard::KeyCode::KEY_W);
+		break;
+	case EventKeyboard::KeyCode::KEY_S:
+		nextCoord.x = position.x;
+		nextCoord.y = position.y - speed * dt;
+		isNotCrossBorder = GameScene::safetyCheck(nextCoord);
+		isNotCollide = GameScene::collision(position, EventKeyboard::KeyCode::KEY_S);
+		break;
+	}
+	if (isNotCrossBorder && isNotCollide) {
+		character->setPosition(nextCoord);
+	} else {
+		character->stopAllActions();
+		CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+	}
+}
+
 void GameScene::keyboardSupport() {
 
-	const int actionMoveForwardId = 8;
-	const int actionMoveRightId = 6;
-	const int actionMoveBackwardId = 2;
-	const int actionMoveLeftId = 4;
-
-	int running = CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/Running.mp3", true);
+	running = CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/Running.mp3", true);
 	CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
 
 	auto eventListener = EventListenerKeyboard::create();
 
 	eventListener->onKeyPressed = [=](EventKeyboard::KeyCode keyCode, Event* event){
-
-		Vec2 loc = event->getCurrentTarget()->getPosition();
-		
-
-		auto actionMoveForward = RepeatForever::create(cocos2d::MoveBy::create(1, cocos2d::Vec2(0, 80)));
-		actionMoveForward->setTag(actionMoveForwardId);
-		
-		auto actionMoveRight = RepeatForever::create(cocos2d::MoveBy::create(1, cocos2d::Vec2(80, 0)));
-		actionMoveRight->setTag(actionMoveRightId); 
-
-		auto actionMoveBackward = RepeatForever::create(cocos2d::MoveBy::create(1, cocos2d::Vec2(0, -80)));
-		actionMoveBackward->setTag(actionMoveBackwardId);
-
-		auto actionMoveLeft = RepeatForever::create(cocos2d::MoveBy::create(1, cocos2d::Vec2(-80, 0)));
-		actionMoveLeft->setTag(actionMoveLeftId);
 	
 		switch (keyCode) {
 		case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
 		case EventKeyboard::KeyCode::KEY_A:
-			character->runAction(actionMoveLeft);
 			GameScene::movAnim("left%d.png", "left0.png", 3);
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+			currentKey = EventKeyboard::KeyCode::KEY_A;
+			this->schedule(schedule_selector(GameScene::updtMoving));
 			break; 
 		case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 		case EventKeyboard::KeyCode::KEY_D:
-			character->runAction(actionMoveRight);
 			GameScene::movAnim("right%d.png", "right0.png", 3);
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+			currentKey = EventKeyboard::KeyCode::KEY_D;
+			this->schedule(schedule_selector(GameScene::updtMoving));
 			break;
 		case EventKeyboard::KeyCode::KEY_UP_ARROW:
 		case EventKeyboard::KeyCode::KEY_W:
-			character->runAction(actionMoveForward);
 			GameScene::movAnim("backward%d.png", "backward0.png", 2);
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+			currentKey = EventKeyboard::KeyCode::KEY_W;
+			this->schedule(schedule_selector(GameScene::updtMoving));
 			break;
 		case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
 		case EventKeyboard::KeyCode::KEY_S:
-			character->runAction(actionMoveBackward);
-			GameScene::movAnim("forward%d.png", "forward0.png", 3 );
+			GameScene::movAnim("forward%d.png", "forward0.png", 3);
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+			currentKey = EventKeyboard::KeyCode::KEY_S;
+			this->schedule(schedule_selector(GameScene::updtMoving));
 			break;
 		}
 	};
 
 	eventListener->onKeyReleased = [=](EventKeyboard::KeyCode keyCode, Event* event){
-		Vec2 loc = event->getCurrentTarget()->getPosition();
 
 		switch (keyCode) {
 		case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
 		case EventKeyboard::KeyCode::KEY_A:
 			character->stopAllActions();
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+			this->unschedule(schedule_selector(GameScene::updtMoving));
 			character->setTexture("characters/left0.png");
 			break;
 		case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 		case EventKeyboard::KeyCode::KEY_D:
 			character->stopAllActions();
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+			this->unschedule(schedule_selector(GameScene::updtMoving));
 			character->setTexture("characters/right0.png");
 			break;
 		case EventKeyboard::KeyCode::KEY_UP_ARROW:
 		case EventKeyboard::KeyCode::KEY_W:
 			character->stopAllActions();
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+			this->unschedule(schedule_selector(GameScene::updtMoving));
 			character->setTexture("characters/backward0.png");
 			break;
 		case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
 		case EventKeyboard::KeyCode::KEY_S:
 			character->stopAllActions();
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+			this->unschedule(schedule_selector(GameScene::updtMoving));
 			character->setTexture("characters/forward0.png");
 			break;
 		}
@@ -231,21 +309,60 @@ Point GameScene::tileCoordForPosition(Point position) {
 	return Point(x, y);
 }
 
-void GameScene::setPlayerPosition(Point position) {
+bool GameScene::collision(Point position, EventKeyboard::KeyCode keyCode) {
 	
-	Point tileCoord = this->tileCoordForPosition(position);
-	int tileGid = wall->tileGIDAt(tileCoord);
+	Point tileCoord;
+	Point charSize = character->getContentSize();
 
-	if (tileGid) {
-		auto properties = map->getPropertiesForGID(tileGid).asValueMap();
+	switch (keyCode) {
+	case EventKeyboard::KeyCode::KEY_A:
+		tileCoord = this->tileCoordForPosition(Vec2(position.x - (charSize.x / 2), position.y));
+		break;
+	case EventKeyboard::KeyCode::KEY_S:
+		tileCoord = this->tileCoordForPosition(Vec2(position.x, position.y - (charSize.y / 2)));
+		break;
+	case EventKeyboard::KeyCode::KEY_D:
+		tileCoord = this->tileCoordForPosition(Vec2(position.x + (charSize.x / 2), position.y));
+		break;
+	case EventKeyboard::KeyCode::KEY_W:
+		tileCoord = this->tileCoordForPosition(Vec2(position.x, position.y + (charSize.y / 2)));
+		break;
+	}
+
+	int tileGidWall = wall->getTileGIDAt(tileCoord);
+
+	if (tileGidWall) {
+		auto properties = map->getPropertiesForGID(tileGidWall).asValueMap();
 		if (!properties.empty()) {
 			auto collision = properties["Collidable"].asString();
 			if ("true" == collision) {
-				character->setPosition(500,500);
+				return false;
+			} else {
+				return true;
 			}
 		}
 	}
-	character->setPosition(position);
+
+	int tileGidCloseDoor = closedDoor->getTileGIDAt(tileCoord);
+
+	if (tileGidCloseDoor) {
+		auto properties = map->getPropertiesForGID(tileGidCloseDoor).asValueMap();
+		if (!properties.empty()) {
+			auto opening = properties["opening"].asString();
+			if ("true" == opening) {
+				closedDoor->removeTileAt(tileCoord);
+				
+				auto delay = DelayTime::create(5);
+				auto callback = CallFunc::create([=]() {
+					closedDoor->setTileGID(tileGidCloseDoor, tileCoord);
+				});
+
+				auto sequence = Sequence::createWithTwoActions(delay, callback);
+				this->runAction(sequence);
+			}
+		}
+	}
+	return true;
 }
 
 void GameScene::menuCloseCallback(Ref* pSender)

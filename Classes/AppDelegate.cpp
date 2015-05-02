@@ -37,7 +37,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
         glview = GLViewImpl::create("Alone On Space");
         director->setOpenGLView(glview);
     }
-
+	Director::getInstance()->setProjection(Director::Projection::_2D);
     // turn on display FPS
     //director->setDisplayStats(true);
 
