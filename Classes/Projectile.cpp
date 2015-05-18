@@ -1,7 +1,7 @@
 #include "Projectile.h"
 #include "cocos2d.h"
 
-Projectile::Projectile(Sprite *character, TMXTiledMap *map, cocos2d::Vector<cocos2d::Sprite *> &_projectiles) {
+Projectile::Projectile(Sprite *character, TMXTiledMap *map, cocos2d::Vector<cocos2d::Sprite *> *_projectiles) {
 
 	this->character = character;
 	this->map = map;
@@ -14,8 +14,7 @@ void Projectile::projectileMoveFinished(Node *pSender) {
 
 	map->removeChild(sprite);
 
-	_projectiles.eraseObject(sprite);
-
+	_projectiles->eraseObject(sprite);
 }
 
 void Projectile::projectileLogic(Touch *touch) {
@@ -31,17 +30,21 @@ void Projectile::projectileLogic(Touch *touch) {
 	int realX;
 
 	auto diff = touchLocation - character->getPosition();
+
 	if (diff.x > 0) {
+
 		realX = (map->getMapSize().width * map->getTileSize().width) + (projectile->getContentSize().width / 2);
+
 	} else {
+
 		realX = -(map->getMapSize().width * map->getTileSize().width) - (projectile->getContentSize().width / 2);
 	}
 
-	float ratio = (float)diff.y / (float)diff.x;
+	float proportion = (float)diff.y / (float)diff.x;
 
-	int realY = ((realX - projectile->getPosition().x) * ratio) + projectile->getPosition().y;
+	int realY = ((realX - projectile->getPosition().x) * proportion) + projectile->getPosition().y;
 
-	auto realDest = Point(realX, realY);
+	auto realTarget = Point(realX, realY);
 
 	int offRealX = realX - projectile->getPosition().x;
 	int offRealY = realY - projectile->getPosition().y;
@@ -51,7 +54,7 @@ void Projectile::projectileLogic(Touch *touch) {
 	float realMoveDuration = length / velocity;
 
 	auto actionMoveDone = CallFuncN::create(CC_CALLBACK_1(Projectile::projectileMoveFinished, this));
-	projectile->runAction(Sequence::create(MoveTo::create(realMoveDuration, realDest), actionMoveDone, NULL));
+	projectile->runAction(Sequence::create(MoveTo::create(realMoveDuration, realTarget), actionMoveDone, NULL));
 
-		_projectiles.pushBack(projectile);
+	_projectiles->pushBack(projectile);
 }

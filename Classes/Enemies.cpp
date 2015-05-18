@@ -1,14 +1,13 @@
 #include "Enemies.h"
 #include "cocos2d.h"
 
-Enemies::Enemies(Sprite* character, TMXTiledMap* map, TMXObjectGroup *objectGroup, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> _projectiles) {
+Enemies::Enemies(Sprite* character, TMXTiledMap *map, TMXObjectGroup *objectGroup, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles) {
 
 	this->character = character;
 	this->map = map;
 	this->objectGroup = objectGroup;
 	this->wall = wall;
 	this->_projectiles = _projectiles;
-	
 }
 
 void Enemies::enemyMoveFinished(Node *pSender) {
@@ -22,6 +21,7 @@ void Enemies::animateEnemy(Sprite *enemy) {
 	auto actionTo1 = RotateTo::create(0, 0, 180);
 	auto actionTo2 = RotateTo::create(0, 0, 0);
 	auto diff = Point(character->getPosition() - enemy->getPosition());
+
 	if (diff.x < 0) {
 		enemy->runAction(actionTo2);
 	}
@@ -29,19 +29,19 @@ void Enemies::animateEnemy(Sprite *enemy) {
 		enemy->runAction(actionTo1);
 	}
 
-	float actualDuration = 0.3f;
+	float enemySpeed = 0.3f;
+
 	auto position = (character->getPosition() - enemy->getPosition());
+
 	position.normalize();
-	auto actionMove = MoveBy::create(actualDuration, position.operator*(10));
+
+	auto actionMove = MoveBy::create(enemySpeed, position.operator*(10));
 	auto actionMoveDone = CallFuncN::create(CC_CALLBACK_1(Enemies::enemyMoveFinished, this));
 
 	enemy->runAction(Sequence::create(actionMove, actionMoveDone, NULL));
 }
 
 void Enemies::addEnemyAtPos(Point position) {
-
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	Point charPos = character->getPosition();
 
@@ -56,7 +56,9 @@ void Enemies::addEnemyAtPos(Point position) {
 		position.y > charPos.y + winSize.height / 2)
 	{
 		this->animateEnemy(enemy);
+
 	} else {
+
 		_visibleEnemies.pushBack(enemy);
 	}
 
@@ -71,7 +73,8 @@ void Enemies::enemyOnScreen() {
 
 	Point charPos = character->getPosition();
 
-	for (Sprite* target : _visibleEnemies) {
+	for (Sprite *target : _visibleEnemies) {
+
 		Point positionEnemy = target->getPosition();
 
 		if (positionEnemy.x > charPos.x - winSize.width / 2 &&
@@ -80,7 +83,9 @@ void Enemies::enemyOnScreen() {
 			positionEnemy.y < charPos.y + winSize.height / 2)
 		{
 			this->animateEnemy(target);
+
 			_visibleEnemies.eraseObject(target);
+
 			break;
 		}
 	}
@@ -88,11 +93,15 @@ void Enemies::enemyOnScreen() {
 
 void Enemies::spawnEnemy() {
 
-	for (auto& eSpawnPoint : objectGroup->getObjects()) {
-		ValueMap& dict = eSpawnPoint.asValueMap();
+	for (auto &enemySpawnPoint : objectGroup->getObjects()) {
+
+		ValueMap &dict = enemySpawnPoint.asValueMap();
+
 		if (dict["Enemy"].asInt() == 1) {
+
 			int x = dict["x"].asInt();
 			int y = dict["y"].asInt();
+
 			this->Enemies::addEnemyAtPos(Point(x, y));
 		}
 	}
@@ -102,7 +111,8 @@ void Enemies::testCollisions() {
 
 	cocos2d::Vector<Sprite*> projectilesToDelete;
 
-	for (Sprite *projectile : _projectiles) {
+	for (Sprite *projectile : *_projectiles) {
+
 		auto projectileRect = Rect(
 			projectile->getPositionX() - projectile->getContentSize().width / 2,
 			projectile->getPositionY() - projectile->getContentSize().height / 2,
@@ -112,6 +122,7 @@ void Enemies::testCollisions() {
 		cocos2d::Vector<Sprite*> targetsToDelete;
 		
 		for (Sprite *target : _enemies) {
+
 			auto targetRect = Rect(
 				target->getPositionX() - target->getContentSize().width / 2,
 				target->getPositionY() - target->getContentSize().height / 2,
@@ -119,12 +130,13 @@ void Enemies::testCollisions() {
 				target->getContentSize().height);
 
 			if (projectileRect.intersectsRect(targetRect)) {
+
 				targetsToDelete.pushBack(target);
 			}
 		}
 
-
 		for (Sprite *target : targetsToDelete) {
+
 			_enemies.eraseObject(target);
 			map->removeChild(target);
 		}
@@ -138,7 +150,8 @@ void Enemies::testCollisions() {
 
 
 	for (Sprite *projectile : projectilesToDelete) {
-		_projectiles.eraseObject(projectile);
+
+		_projectiles->eraseObject(projectile);
 		map->removeChild(projectile);
 	}
 	projectilesToDelete.clear();

@@ -6,7 +6,7 @@
 
 using namespace cocos2d;
 
-class Projectile : Node
+class Projectile : public Node
 {
 private:
 
@@ -14,10 +14,10 @@ private:
 
 	TMXTiledMap *map;
 
-	cocos2d::Vector<cocos2d::Sprite *> _projectiles;
+	cocos2d::Vector<cocos2d::Sprite *> *_projectiles;
 public:
 
-	Projectile(Sprite *character, TMXTiledMap *map, cocos2d::Vector<cocos2d::Sprite *>& _projectiles);
+	Projectile(Sprite *character, TMXTiledMap *map, cocos2d::Vector<cocos2d::Sprite *> *_projectiles);
 
 	void projectileMoveFinished(cocos2d::Node *pSender);
 

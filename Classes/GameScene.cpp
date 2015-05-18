@@ -28,9 +28,6 @@ bool GameScene::init()
         return false;
     }
 	
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
 	// Preload sound effects and music
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/Running.mp3");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/OpeningDoor.mp3");
@@ -40,20 +37,18 @@ bool GameScene::init()
 
 	// Create tile map
 	map = TMXTiledMap::create("map/map.tmx");
+	this->addChild(map);
+	map->addChild(character, 10);
 
 	wall = map->getLayer("wall");
 	openDoor = map->getLayer("open_door");
 	openDoor->setLocalZOrder(20);
-	//closedDoor = map->getLayer("closed_door");
-
-	this->addChild(map);
-	map->addChild(character, 10);
 
 	// Create objects 
 	objectGroup = map->getObjectGroup("Objects");
 
 	// Init object Enemies
-	enemies = new Enemies(character, map, objectGroup, wall, _projectiles);
+	enemies = new Enemies(character, map, objectGroup, wall, &_projectiles);
 	enemies->spawnEnemy();
 
 	// Init Collisions
@@ -64,7 +59,7 @@ bool GameScene::init()
 	anim = new Animations(character);
 
 	// Init Projectiles
-	projectile = new Projectile(character, map, _projectiles);
+	projectile = new Projectile(character, map, &_projectiles);
 
 	auto spawnPoint = objectGroup->getObject("SpawnPoint");
 
@@ -73,15 +68,15 @@ bool GameScene::init()
 	
 	character->setPosition(x + map->getTileSize().width / 2, y + map->getTileSize().height / 2);
 
-	this->scheduleUpdate();
-
-	GameScene::keyboardSupport();
-
 	// Init touch
 	auto listener = EventListenerTouchOneByOne::create();
 	listener->onTouchBegan = [&](Touch *touch, Event *event)->bool {return true; };
 	listener->onTouchEnded = CC_CALLBACK_2(GameScene::onTouchEnded, this);
 	this->_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
+	GameScene::keyboardSupport();
+
+	this->scheduleUpdate();
 
 	return true;
 }
@@ -108,10 +103,11 @@ void GameScene::setViewPointCenter(Point position) {
 	
 	x = MIN(x, (map->getMapSize().width * map->getTileSize().width) - winSize.width / 2);
 	y = MIN(y, (map->getMapSize().height * map->getTileSize().height) - winSize.height / 2);
-	auto actualPosition = Point(x, y);
 
+	auto actualPosition = Point(x, y);
 	auto centerOfView = Point(winSize.width / 2, winSize.height / 2);
 	auto viewPoint = centerOfView - actualPosition;
+
 	this->setPosition(viewPoint);
 }
 
@@ -126,34 +122,50 @@ void GameScene::centerProcessingMove(EventKeyboard::KeyCode keyCode, float dt) {
 	bool isNotCollide;
 
 	switch (keyCode) {
+
 	case EventKeyboard::KeyCode::KEY_A:
+
 		nextCoord.x = position.x - SPEED * dt;
 		nextCoord.y = position.y;
+
 		isNotCrossBorder = collisions->checkBorder(nextCoord);
 		isNotCollide = collisions->collision(position, EventKeyboard::KeyCode::KEY_A);
 		break;
+
 	case EventKeyboard::KeyCode::KEY_D:
+
 		nextCoord.x = position.x + SPEED * dt;
 		nextCoord.y = position.y;
+
 		isNotCrossBorder = collisions->checkBorder(nextCoord);
 		isNotCollide = collisions->collision(position, EventKeyboard::KeyCode::KEY_D);
 		break;
+
 	case EventKeyboard::KeyCode::KEY_W:
+
 		nextCoord.x = position.x;
 		nextCoord.y = position.y + SPEED * dt;
+
 		isNotCrossBorder = collisions->checkBorder(nextCoord);
 		isNotCollide = collisions->collision(position, EventKeyboard::KeyCode::KEY_W);
 		break;
+
 	case EventKeyboard::KeyCode::KEY_S:
+
 		nextCoord.x = position.x;
 		nextCoord.y = position.y - SPEED * dt;
+
 		isNotCrossBorder = collisions->checkBorder(nextCoord);
 		isNotCollide = collisions->collision(position, EventKeyboard::KeyCode::KEY_S);
 		break;
 	}
+
 	if (isNotCrossBorder && isNotCollide) {
+
 		character->setPosition(nextCoord);
+
 	} else {
+
 		character->stopAllActions();
 		CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
 	}
@@ -169,33 +181,54 @@ void GameScene::keyboardSupport() {
 	eventListener->onKeyPressed = [=](EventKeyboard::KeyCode keyCode, Event* event){
 	
 		switch (keyCode) {
+
 		case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
 		case EventKeyboard::KeyCode::KEY_A:
-			anim->movAnim("left%d.png", "left0.png", 3);
+
+			anim->movAnim("left%d.png", 3);
+
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+
 			currentKey = EventKeyboard::KeyCode::KEY_A;
+
 			this->schedule(schedule_selector(GameScene::updtMoving));
+
 			break; 
 		case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 		case EventKeyboard::KeyCode::KEY_D:
-			anim->movAnim("right%d.png", "right0.png", 3);
+
+			anim->movAnim("right%d.png", 3);
+
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+
 			currentKey = EventKeyboard::KeyCode::KEY_D;
+
 			this->schedule(schedule_selector(GameScene::updtMoving));
+
 			break;
 		case EventKeyboard::KeyCode::KEY_UP_ARROW:
 		case EventKeyboard::KeyCode::KEY_W:
-			anim->movAnim("backward%d.png", "backward0.png", 2);
+
+			anim->movAnim("backward%d.png", 2);
+
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+
 			currentKey = EventKeyboard::KeyCode::KEY_W;
+
 			this->schedule(schedule_selector(GameScene::updtMoving));
+
 			break;
 		case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
 		case EventKeyboard::KeyCode::KEY_S:
-			anim->movAnim("forward%d.png", "forward0.png", 3);
+
+			anim->movAnim("forward%d.png", 3);
+
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+
 			currentKey = EventKeyboard::KeyCode::KEY_S;
+
 			this->schedule(schedule_selector(GameScene::updtMoving));
+
 			break;
 		}
 	};
@@ -203,33 +236,54 @@ void GameScene::keyboardSupport() {
 	eventListener->onKeyReleased = [=](EventKeyboard::KeyCode keyCode, Event* event){
 
 		switch (keyCode) {
+
 		case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
 		case EventKeyboard::KeyCode::KEY_A:
+
 			character->stopAllActions();
+
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+
 			this->unschedule(schedule_selector(GameScene::updtMoving));
+
 			character->setTexture("characters/left0.png");
+
 			break;
 		case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 		case EventKeyboard::KeyCode::KEY_D:
+
 			character->stopAllActions();
+
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+
 			this->unschedule(schedule_selector(GameScene::updtMoving));
+
 			character->setTexture("characters/right0.png");
+
 			break;
 		case EventKeyboard::KeyCode::KEY_UP_ARROW:
 		case EventKeyboard::KeyCode::KEY_W:
+
 			character->stopAllActions();
+
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+
 			this->unschedule(schedule_selector(GameScene::updtMoving));
+
 			character->setTexture("characters/backward0.png");
+
 			break;
 		case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
 		case EventKeyboard::KeyCode::KEY_S:
+
 			character->stopAllActions();
+
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+
 			this->unschedule(schedule_selector(GameScene::updtMoving));
+
 			character->setTexture("characters/forward0.png");
+
 			break;
 		}
 	};

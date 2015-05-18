@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" nextobjectid="37">
+ <tileset firstgid="1" name="SpaceShip" tilewidth="32" tileheight="32">
+  <image source="../spaceship/armature/base_0.png" width="512" height="512"/>
+  <terraintypes>
+   <terrain name="Новый участок" tile="-1"/>
+  </terraintypes>
+  <tile id="45">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="105">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="106">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+  <tile id="107">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="121">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="122">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+  <tile id="123">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="173">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+  <tile id="189">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="floor" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJzVmmuW2jAMhQVhA5DZQCZsgJL9b6E76MwKpqygU+ec3MOHkEvBkMcPHSuKbEvy9UNOKjPbJKqGcpVojWfy/lm6rBPJpBvJqLtNtEtUJ3pDmeuLdvs6Ob3N8J79qF/2H8mkG8mo2yR6T9Qm2qOkrrdPbfk6uZiwrnTVL/uPZNKNZNQ9JPqR6JioQ0ld74fakm7uvUr65nXZv3hv0yEji3S7jO4qiLPey56t5TEY+cm2yDPe3hbyX4l+JzrdwW+DMfX2NJbH9iaQsS3ytLV3/k8qvp/EN0FsNG9lw8Hy2H4LZLk4fyb6lejjBbz3QTH19uTwGmGkr/819OPpEczcw/uYcn5s7N/YjtabZ2LmHj4aF/rBd9GY+vqvws8tPlpb+fxqPDyL9370ceUaNBVO7uWjPYDPU+HkXt7vAZUtE1d+valtebjqMeXXGz/P54CZWzzPzfRnabjiPsb5Tj9egYefT26T+xjnO+fH1Jj5H562c75XA0V+7TLyqXHFs63mR52xvx70VYfrXBSvsdarw2BjTzwftoGdke23xmNMjO3tOgc/2vX5JMqXKIviNRauVnbOfWnfauB3oGgc5oIrfyZhXi7bOR+o65+nxJU/k8iPxi7XJY+rSDYlrqK8tLYzrnL3BpFsLrhqYCPlJfGaAldae49OXhKvKXDF+UF5Sby+C2LwKK468PKjKozXqSAGj+KKvM6+vU8l8ToVxOBRXJHXOLWF8ToVxOAR3u+HGo9jYbzGwlV0d+XPWkvAVe67QTP4uCqM11i4inJafu/bFsZrLFwp9/Djwj1+Cbjidwx+F2SOuARc8TsG50fpt64p9sFuiH+UfyxlvWJ+Tj9UVoXxGnO92oM0BjyXzBVX2hfWw3h0IH++6sdjTriiXf5fCN018J8Lvp8Trnzex/x7Z5ffa5Wfa2zmhCvadbDLuxDeJ+j7B8+Jpbhao/2dndeU2i5j6edm9G8Rz+S8i9IdFHMpn59zz9/a9b2iv59jSWoh15ri72BydzQqqRONAe+nN3Z9H+T/zeF7ttOgvb2jd8g7u76PaQMZ/W8DHfLRnXTuX5vo3wa1Ix2dBzpH8t3/C8E6zOekRztoN2WtXfqpOPwFJ3BhSA==
+  </data>
+ </layer>
+ <layer name="wall" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJztlwEKwzAIRXuGHmQHGzvB2OHLoGVjmET9PyYZfigbbTS+1Bi7balUajbdHNcoMeOK5ijFisbRk8OyzgyOXvll8cma35OPzDWO5KjlNrpXozksviwsM3Nc/5EY7+fvwzE3MkYap8m50pjn+fxVGWPNZWaOSByoonNY8jUjh/Z9fOf+yhy13PfIEl/EXuvN4fUn1c5VODS1kx1P7/cRZf+228G5GXGg9v/0PphKjo+95zyZjUPyx+7/WOegVRq/WlYkb1n9E3rujNq7Fj+rcZR8rcRR87Uix+/3y3V/3+q9iWRnnZupUv/ptdPWWuk5si7aOaxjNM+1/XzPvoTBoVVy4GPYHJ5+Z0aO0v3e53mrHrHyKoKjVY+0ssRqrXMReaWJB/1GiOJgxILYMvd5SygHssdqtdRzIRo5dyo1ow6ChkmH
+  </data>
+ </layer>
+ <layer name="open_door" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJzt1kEKgCAQBVDPX51AO2yzaOHaIp14Dz66FBmGXwoAAH+yRfbIMfshD9VIi5yzH0IamWe/dfd6n2b/W5nnp2d3AgDkMNo/V+uto/3z7d662r+M0uchP/sIANZwATkpGB8=
+  </data>
+ </layer>
+ <layer name="closed_door" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJzt1sENgCAQBED6tQR70g60NTrwcSIHMvPlwYZsyJYCALCWIztAI9fD2dYtxbf2pHtX6Mhf6T5v6A8AAD1F9+douzW6P1vv1tHeJcqeh/n5j8h2Zgdo5M4OAEytAl66CpE=
+  </data>
+ </layer>
+ <objectgroup name="Objects">
+  <object id="9" name="SpawnPoint" x="809.35" y="808.933" width="58" height="13"/>
+  <object id="29" name="EnemyPosition" x="229" y="335" width="31" height="32">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="31" name="EnemyPosition" x="792" y="1270" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="32" name="EnemyPosition" x="187" y="1287.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="33" name="EnemyPosition" x="1150" y="1408.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="34" name="EnemyPosition" x="1337" y="472.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="35" name="EnemyPosition" x="1012" y="175.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="36" name="EnemyPosition" x="1308" y="179.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

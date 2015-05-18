@@ -20,10 +20,10 @@ private:
 
 	cocos2d::Vector<cocos2d::Sprite *> _visibleEnemies;
 	cocos2d::Vector<cocos2d::Sprite *> _enemies;
-	cocos2d::Vector<cocos2d::Sprite *> _projectiles;
+	cocos2d::Vector<cocos2d::Sprite *> *_projectiles;
 public:
 
-	Enemies(Sprite *character, TMXTiledMap *map, TMXObjectGroup *objectGroup, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> _projectiles);
+	Enemies(Sprite *character, TMXTiledMap *map, TMXObjectGroup *objectGroup, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles);
 
 	void enemyMoveFinished(Node *pSender);
 

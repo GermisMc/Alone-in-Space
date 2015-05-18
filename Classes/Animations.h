@@ -14,7 +14,7 @@ public:
 
 	Animations(Sprite *character);
 	
-	void movAnim(char *anim_direct, char *start_anim, int frames_num);
+	void movAnim(char *anim_direct, int frames_num);
 };
 
 #endif // __ANIMATION_H__

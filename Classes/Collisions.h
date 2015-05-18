@@ -15,6 +15,7 @@ private:
 	TMXLayer *wall;
 	TMXLayer *closedDoor;
 public:
+
 	Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall);
 
 	bool checkBorder(Point position);
