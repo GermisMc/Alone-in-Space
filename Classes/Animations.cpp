@@ -11,7 +11,6 @@ void Animations::movAnim(char *anim_direct, int frames_num)  {
 	//SpriteBatchNode* spritebatch = SpriteBatchNode::create("characters/chabi.png");
 
 	SpriteFrameCache* cache = SpriteFrameCache::getInstance();
-	cache->addSpriteFramesWithFile("characters/chabi.plist");
 
 	// Create a new sprite
 	/*character = Sprite::createWithSpriteFrameName(start_anim);
