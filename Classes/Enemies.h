@@ -2,10 +2,11 @@
 #define __ENEMIES_H__
 
 #include "cocos2d.h"
+#include <vector>
 
 using namespace cocos2d;
 
-class Enemies
+class Enemies : public Node
 {
 private:
 
@@ -21,9 +22,11 @@ private:
 	cocos2d::Vector<cocos2d::Sprite *> _visibleEnemies;
 	cocos2d::Vector<cocos2d::Sprite *> _enemies;
 	cocos2d::Vector<cocos2d::Sprite *> *_projectiles;
+
+	std::vector<cocos2d::Point> _spawnCoord;
 public:
 
-	Enemies(Sprite *character, TMXTiledMap *map, TMXObjectGroup *objectGroup, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles);
+	Enemies(Sprite *character, TMXTiledMap *map, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles);
 
 	void enemyMoveFinished(Node *pSender);
 
@@ -36,6 +39,10 @@ public:
 	void enemyOnScreen();
 
 	void testCollisions();
+
+	void spawner();
+
+	void spawnerTimer();
 
 	//void stopEnemyAtBlock();
 

@@ -6,6 +6,7 @@
 #include "Collisions.h"
 #include "Animations.h"
 #include "Projectile.h"
+#include "Guns.h"
 
 using namespace cocos2d;
 
@@ -13,12 +14,18 @@ class GameScene : public cocos2d::Layer
 {
 private:
 
+	char *currentTexture;
+
+	int ammorevolver;
+	int ammoplasmagun;
+
 	TMXLayer *openDoor;
 
 	Enemies *enemies;
 	Collisions *collisions;
 	Animations *anim;
 	Projectile *projectile;
+	Guns *gun;
 public:
 
 	cocos2d::Vector<cocos2d::Sprite *> _projectiles;
@@ -30,6 +37,7 @@ public:
 	TMXLayer *wall;
 
 	Sprite *character;
+	Sprite *flash;
 
 	EventKeyboard::KeyCode currentKey;
 	
@@ -51,6 +59,8 @@ public:
 	void centerProcessingMove(EventKeyboard::KeyCode keyCode, float dt);
 
 	void setViewPointCenter(cocos2d::Point position);
+
+	void shots(Touch *touch);
 
 	void update(float dt);
 

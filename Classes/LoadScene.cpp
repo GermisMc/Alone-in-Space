@@ -36,12 +36,20 @@ bool LoadScene::init() {
 
 	this->addChild(logo);
 
-	// Preload all resource
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/Running.mp3");
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/OpeningDoor.mp3");
+	// Preload sounds
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/running.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/door.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/revolver.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/plasmagun.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/emptyclip.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/pickupammo.mp3");
 
+	// Preload textures
 	SpriteFrameCache* cache = SpriteFrameCache::getInstance();
 	cache->addSpriteFramesWithFile("characters/chabi.plist");
+	cache->addSpriteFramesWithFile("flash/gunflash.plist");
+	cache->addSpriteFramesWithFile("guns/guns.plist");
+	cache->addSpriteFramesWithFile("projectiles/projectiles.plist");
 
 	auto labelContinue = Label::createWithSystemFont("Press any key to continue", "Arial", 15);
 

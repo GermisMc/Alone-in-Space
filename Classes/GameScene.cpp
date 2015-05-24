@@ -27,10 +27,11 @@ bool GameScene::init()
     {
         return false;
     }
-	
-	// Preload sound effects and music
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/Running.mp3");
-	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/OpeningDoor.mp3");
+
+	// Default
+	ammoplasmagun = 0;
+	ammorevolver = 0;
+	currentTexture = "plasmagun.png";
 
 	// Create character
 	character = Sprite::create("characters/backward0.png");
@@ -48,18 +49,19 @@ bool GameScene::init()
 	objectGroup = map->getObjectGroup("Objects");
 
 	// Init object Enemies
-	enemies = new Enemies(character, map, objectGroup, wall, &_projectiles);
+	enemies = new Enemies(character, map, wall, &_projectiles);
+	GameScene::addChild(enemies);
 	enemies->spawnEnemy();
 
 	// Init Collisions
-	collisions = new Collisions(map, character, wall);
+	collisions = new Collisions(map, character, wall, &ammorevolver, &ammoplasmagun);
 	GameScene::addChild(collisions);
 
 	// Init Animations
 	anim = new Animations(character);
-
+	
 	// Init Projectiles
-	projectile = new Projectile(character, map, &_projectiles);
+	projectile = new Projectile(character, map, &_projectiles, &flash);
 
 	auto spawnPoint = objectGroup->getObject("SpawnPoint");
 
@@ -67,6 +69,11 @@ bool GameScene::init()
 	int y = spawnPoint["y"].asInt();
 	
 	character->setPosition(x + map->getTileSize().width / 2, y + map->getTileSize().height / 2);
+
+	// Init gun
+	gun = new Guns(character, map, &flash);
+	GameScene::addChild(gun);
+	gun->gunRender(currentKey, "plasmagun.png");
 
 	// Init touch
 	auto listener = EventListenerTouchOneByOne::create();
@@ -86,6 +93,8 @@ void GameScene::update(float dt) {
 	GameScene::setViewPointCenter(character->getPosition());
 	enemies->enemyOnScreen();
 	enemies->testCollisions();
+	enemies->spawnerTimer();
+	collisions->projCollision(&_projectiles);
 	//enemies->stopEnemyAtBlock();
 }
 
@@ -120,7 +129,7 @@ void GameScene::centerProcessingMove(EventKeyboard::KeyCode keyCode, float dt) {
 
 	bool isNotCrossBorder;
 	bool isNotCollide;
-
+	
 	switch (keyCode) {
 
 	case EventKeyboard::KeyCode::KEY_A:
@@ -173,12 +182,14 @@ void GameScene::centerProcessingMove(EventKeyboard::KeyCode keyCode, float dt) {
 
 void GameScene::keyboardSupport() {
 
-	running = CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/Running.mp3", true);
+	running = CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/running.mp3", true);
 	CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
 
 	auto eventListener = EventListenerKeyboard::create();
 
 	eventListener->onKeyPressed = [=](EventKeyboard::KeyCode keyCode, Event* event){
+
+		gun->gunRender(keyCode, currentTexture);
 	
 		switch (keyCode) {
 
@@ -293,7 +304,26 @@ void GameScene::keyboardSupport() {
 
 void GameScene::onTouchEnded(Touch *touch, Event *event) {
 	
-	projectile->projectileLogic(touch);
+	GameScene::shots(touch);
+}
+
+void GameScene::shots(Touch *touch) {
+
+	if (ammoplasmagun > 0) {
+
+		gun->gunRender(currentKey, "plasmagun.png");
+		gun->flashRender();
+		projectile->projectileLogic(touch, "projplasmagun.png", "sounds/plasmagun.mp3");
+		ammoplasmagun--;
+	}
+	else if (ammorevolver > 0) {
+
+		gun->gunRender(currentKey, "revolver.png");
+		gun->flashRender();
+		projectile->projectileLogic(touch, "projrevolver.png", "sounds/revolver.mp3");
+		ammorevolver--;
+	}
+	else { CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/emptyclip.mp3"); }
 }
 
 void GameScene::menuCloseCallback(Ref* pSender)

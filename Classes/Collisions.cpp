@@ -2,13 +2,16 @@
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h" 
 
-Collisions::Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall) {
+Collisions::Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun) {
 
 	this->map = map;
 	this->character = character;
 	this->wall = wall;
+	this->ammorevolver = ammorevolver;
+	this->ammoplasmagun = ammoplasmagun;
 
 	closedDoor = map->getLayer("closed_door");
+	ammo = map->getLayer("ammo");
 }
 
 bool Collisions::checkBorder(Point position) {
@@ -74,11 +77,14 @@ bool Collisions::collision(Point position, EventKeyboard::KeyCode keyCode) {
 	}
 
 	Collisions::openDoors(tileCoord);
+	Collisions::pickAmmo(tileCoord);
 
 	return true;
 }
 
 void Collisions::openDoors(Point tileCoord) {
+	
+	const float timerCloseDoor = 5.0f;
 
 	int tileGidCloseDoor = closedDoor->getTileGIDAt(tileCoord);
 
@@ -92,16 +98,16 @@ void Collisions::openDoors(Point tileCoord) {
 
 			if ("true" == opening) {
 
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/OpeningDoor.mp3");
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/door.mp3");
 
 				closedDoor->removeTileAt(tileCoord);
 
-				auto delay = DelayTime::create(5);
+				auto delay = DelayTime::create(timerCloseDoor);
 				auto callback = CallFunc::create([=]() {
 
 					closedDoor->setTileGID(tileGidCloseDoor, tileCoord);
 
-					CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/OpeningDoor.mp3");
+					CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/door.mp3");
 				});
 
 				auto sequence = Sequence::createWithTwoActions(delay, callback);
@@ -110,4 +116,64 @@ void Collisions::openDoors(Point tileCoord) {
 			}
 		}
 	}
+}
+
+void Collisions::pickAmmo(Point tileCoord) {
+
+	int tileGidPickAmmo = ammo->getTileGIDAt(tileCoord);
+
+	if (tileGidPickAmmo) {
+
+		auto properties = map->getPropertiesForGID(tileGidPickAmmo).asValueMap();
+
+		if (!properties.empty()) {
+
+			auto type = properties["type"].asString();
+
+			if ("revolver" == type) {
+
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/pickupammo.mp3");
+
+				*ammorevolver += 5;
+
+				ammo->removeTileAt(tileCoord);
+			}
+			else if ("plasmagun" == type) {
+
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/pickupammo.mp3");
+
+				*ammoplasmagun += 5;
+
+				ammo->removeTileAt(tileCoord);
+			}
+		}
+	}
+}
+
+void Collisions::projCollision(cocos2d::Vector<cocos2d::Sprite *> *_projectiles) {
+
+	cocos2d::Vector<Sprite*> projectilesToDelete;
+
+	for (Sprite *projectile : *_projectiles) {
+
+		Point projCoord = this->tileCoordForPosition(projectile->getPosition());
+
+		if (map->getBoundingBox().containsPoint(projectile->getPosition())) {
+
+			int tileGidWall = wall->getTileGIDAt(projCoord);
+			int tileGidCloseDoor = closedDoor->getTileGIDAt(projCoord);
+
+			if (tileGidWall || tileGidCloseDoor) {
+
+				projectilesToDelete.pushBack(projectile);
+			}
+		}
+	}
+
+	for (Sprite *projectile : projectilesToDelete) {
+
+		_projectiles->eraseObject(projectile);
+		map->removeChild(projectile);
+	}
+		projectilesToDelete.clear();
 }

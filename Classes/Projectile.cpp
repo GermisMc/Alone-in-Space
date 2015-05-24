@@ -1,11 +1,13 @@
 #include "Projectile.h"
 #include "cocos2d.h"
+#include "SimpleaudioEngine.h"
 
-Projectile::Projectile(Sprite *character, TMXTiledMap *map, cocos2d::Vector<cocos2d::Sprite *> *_projectiles) {
+Projectile::Projectile(Sprite *character, TMXTiledMap *map, cocos2d::Vector<cocos2d::Sprite *> *_projectiles, Sprite **flash) {
 
 	this->character = character;
 	this->map = map;
 	this->_projectiles = _projectiles;
+	this->flash = flash;
 }
 
 void Projectile::projectileMoveFinished(Node *pSender) {
@@ -17,13 +19,15 @@ void Projectile::projectileMoveFinished(Node *pSender) {
 	_projectiles->eraseObject(sprite);
 }
 
-void Projectile::projectileLogic(Touch *touch) {
+void Projectile::projectileLogic(Touch *touch, char *proj, char *projsound) {
 
 	auto touchLocation = touch->getLocation();
 	touchLocation = map->convertToNodeSpace(touchLocation);
 
-	auto projectile = Sprite::create("projectiles/laserball.png");
-	projectile->setPosition(character->getPosition());
+	auto projectile = Sprite::createWithSpriteFrameName(proj);
+	projectile->setPosition((*flash)->getPosition());
+
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(projsound);
 
 	map->addChild(projectile, 10);
 

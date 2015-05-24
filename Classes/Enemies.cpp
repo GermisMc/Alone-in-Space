@@ -1,11 +1,10 @@
 #include "Enemies.h"
 #include "cocos2d.h"
 
-Enemies::Enemies(Sprite* character, TMXTiledMap *map, TMXObjectGroup *objectGroup, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles) {
+Enemies::Enemies(Sprite* character, TMXTiledMap *map, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles) {
 
 	this->character = character;
 	this->map = map;
-	this->objectGroup = objectGroup;
 	this->wall = wall;
 	this->_projectiles = _projectiles;
 }
@@ -30,7 +29,7 @@ void Enemies::animateEnemy(Sprite *enemy) {
 	}
 
 	float enemySpeed = 0.3f;
-
+	
 	auto position = (character->getPosition() - enemy->getPosition());
 
 	position.normalize();
@@ -93,6 +92,8 @@ void Enemies::enemyOnScreen() {
 
 void Enemies::spawnEnemy() {
 
+	objectGroup = map->getObjectGroup("Enemies");
+
 	for (auto &enemySpawnPoint : objectGroup->getObjects()) {
 
 		ValueMap &dict = enemySpawnPoint.asValueMap();
@@ -102,7 +103,46 @@ void Enemies::spawnEnemy() {
 			int x = dict["x"].asInt();
 			int y = dict["y"].asInt();
 
+			//auto *spawnCoord = Point(x, y);
+
+			_spawnCoord.push_back(Point(x, y));
+
 			this->Enemies::addEnemyAtPos(Point(x, y));
+		}
+	}
+}
+
+void Enemies::spawnerTimer() {
+
+	const float timerSpawnEnemy = 5.0f;
+
+	auto delay = DelayTime::create(timerSpawnEnemy);
+
+	auto callback = CallFunc::create([=]() {
+
+		this->Enemies::spawner();
+		this->stopAllActions();
+	});
+
+	auto sequence = Sequence::createWithTwoActions(delay, callback);
+
+	this->runAction(sequence);
+}
+
+void Enemies::spawner() {
+
+	auto winSize = Director::getInstance()->getWinSize();
+
+	Point charPos = character->getPosition();
+
+	for (Point spawn : _spawnCoord) {
+
+		if (spawn.x > charPos.x - winSize.width / 2 &&
+			spawn.y > charPos.y - winSize.height / 2 &&
+			spawn.x < charPos.x + winSize.width / 2 &&
+			spawn.y < charPos.y + winSize.height / 2)
+		{
+			this->Enemies::addEnemyAtPos(spawn);
 		}
 	}
 }
@@ -134,7 +174,7 @@ void Enemies::testCollisions() {
 				targetsToDelete.pushBack(target);
 			}
 		}
-
+		
 		for (Sprite *target : targetsToDelete) {
 
 			_enemies.eraseObject(target);
@@ -147,7 +187,6 @@ void Enemies::testCollisions() {
 		}
 		targetsToDelete.clear();
 	}
-
 
 	for (Sprite *projectile : projectilesToDelete) {
 
