@@ -18,6 +18,7 @@ private:
 
 	int ammorevolver;
 	int ammoplasmagun;
+	int hp;
 
 	TMXLayer *openDoor;
 
@@ -29,6 +30,7 @@ private:
 public:
 
 	cocos2d::Vector<cocos2d::Sprite *> _projectiles;
+	cocos2d::Vector<cocos2d::Sprite *> _projTurret;
 
 	TMXObjectGroup *objectGroup;
 

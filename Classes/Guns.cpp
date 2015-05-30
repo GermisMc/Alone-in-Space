@@ -72,7 +72,8 @@ void Guns::gunRender(EventKeyboard::KeyCode currentKey, char *guntexture) {
 
 void Guns::flashRender() {
 
-	const float flashSpeed = 0.08f;
+	const float FLASH_SPEED = 0.08f;
+	const char *FLASH_NAME = "flash";
 
 	SpriteFrameCache* cache = SpriteFrameCache::getInstance();
 
@@ -91,7 +92,7 @@ void Guns::flashRender() {
 
 	*flash = Sprite::createWithSpriteFrameName("gunflash0.png");
 
-	map->addChild(*flash, 15);
+	map->addChild(*flash, 15, FLASH_NAME);
 
 	(*flash)->setPosition(Vec2(character->getPosition().x - gun->getContentSize().width - 5, character->getPosition().y));
 
@@ -129,11 +130,11 @@ void Guns::flashRender() {
 	(*flash)->runAction(Animate::create(animation));
 
 	// Remove flash
-	auto delay = DelayTime::create(flashSpeed);
+	auto delay = DelayTime::create(FLASH_SPEED);
 
 	auto callback = CallFunc::create([=]() {
 
-		map->removeChild(*flash);
+		map->removeChildByName(FLASH_NAME);
 	});
 
 	auto sequence = Sequence::createWithTwoActions(delay, callback);

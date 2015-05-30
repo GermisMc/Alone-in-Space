@@ -31,6 +31,7 @@ bool GameScene::init()
 	// Default
 	ammoplasmagun = 0;
 	ammorevolver = 0;
+	hp = 100;
 	currentTexture = "plasmagun.png";
 
 	// Create character
@@ -48,13 +49,8 @@ bool GameScene::init()
 	// Create objects 
 	objectGroup = map->getObjectGroup("Objects");
 
-	// Init object Enemies
-	enemies = new Enemies(character, map, wall, &_projectiles);
-	GameScene::addChild(enemies);
-	enemies->spawnEnemy();
-
 	// Init Collisions
-	collisions = new Collisions(map, character, wall, &ammorevolver, &ammoplasmagun);
+	collisions = new Collisions(map, character, wall, &ammorevolver, &ammoplasmagun, &hp);
 	GameScene::addChild(collisions);
 
 	// Init Animations
@@ -69,6 +65,11 @@ bool GameScene::init()
 	int y = spawnPoint["y"].asInt();
 	
 	character->setPosition(x + map->getTileSize().width / 2, y + map->getTileSize().height / 2);
+
+	// Init Enemies
+	enemies = new Enemies(character, map, wall, &_projectiles, &ammoplasmagun, &_projTurret, &hp);
+	GameScene::addChild(enemies);
+	enemies->spawnEnemy();
 
 	// Init gun
 	gun = new Guns(character, map, &flash);
@@ -92,10 +93,10 @@ void GameScene::update(float dt) {
 
 	GameScene::setViewPointCenter(character->getPosition());
 	enemies->enemyOnScreen();
-	enemies->testCollisions();
+	enemies->projCollisionEnemy();
+	enemies->enemyCollisionCharacter();
 	enemies->spawnerTimer();
-	collisions->projCollision(&_projectiles);
-	//enemies->stopEnemyAtBlock();
+	collisions->projCollision(&_projectiles, &_projTurret);
 }
 
 void GameScene::updtMoving(float dt) {
@@ -104,7 +105,7 @@ void GameScene::updtMoving(float dt) {
 }
 
 void GameScene::setViewPointCenter(Point position) {
-
+	
 	auto winSize = Director::getInstance()->getWinSize();
 
 	int x = MAX(position.x, winSize.width / 2);

@@ -2,16 +2,18 @@
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h" 
 
-Collisions::Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun) {
+Collisions::Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun, int *hp) {
 
 	this->map = map;
 	this->character = character;
 	this->wall = wall;
 	this->ammorevolver = ammorevolver;
 	this->ammoplasmagun = ammoplasmagun;
+	this->hp = hp;
 
 	closedDoor = map->getLayer("closed_door");
 	ammo = map->getLayer("ammo");
+	items = map->getLayer("items");
 }
 
 bool Collisions::checkBorder(Point position) {
@@ -78,13 +80,14 @@ bool Collisions::collision(Point position, EventKeyboard::KeyCode keyCode) {
 
 	Collisions::openDoors(tileCoord);
 	Collisions::pickAmmo(tileCoord);
+	Collisions::pickHp(tileCoord);
 
 	return true;
 }
 
 void Collisions::openDoors(Point tileCoord) {
 	
-	const float timerCloseDoor = 5.0f;
+	const float TIMER_CLOSE_DOOR = 5.0f;
 
 	int tileGidCloseDoor = closedDoor->getTileGIDAt(tileCoord);
 
@@ -102,7 +105,7 @@ void Collisions::openDoors(Point tileCoord) {
 
 				closedDoor->removeTileAt(tileCoord);
 
-				auto delay = DelayTime::create(timerCloseDoor);
+				auto delay = DelayTime::create(TIMER_CLOSE_DOOR);
 				auto callback = CallFunc::create([=]() {
 
 					closedDoor->setTileGID(tileGidCloseDoor, tileCoord);
@@ -150,13 +153,34 @@ void Collisions::pickAmmo(Point tileCoord) {
 	}
 }
 
-void Collisions::projCollision(cocos2d::Vector<cocos2d::Sprite *> *_projectiles) {
+void Collisions::pickHp(Point tileCoord) {
+
+	int tileGidPickHp = items->getTileGIDAt(tileCoord);
+
+	if (tileGidPickHp) {
+
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/heal.mp3");
+
+		*hp = 100;
+
+		items->removeTileAt(tileCoord);
+	}
+}
+
+void Collisions::projCollision(cocos2d::Vector<cocos2d::Sprite *> *_projectiles, cocos2d::Vector<cocos2d::Sprite *> *_projTurret) {
+
+	Collisions::projCollisionLogic(_projectiles, "projCharacter");
+	Collisions::projCollisionLogic(_projTurret, "projTurret");
+}
+
+void Collisions::projCollisionLogic(cocos2d::Vector<cocos2d::Sprite *> *projectiles, char *type) {
 
 	cocos2d::Vector<Sprite*> projectilesToDelete;
 
-	for (Sprite *projectile : *_projectiles) {
+	for (Sprite *projectile : *projectiles) {
 
 		Point projCoord = this->tileCoordForPosition(projectile->getPosition());
+		Point charCoord = this->tileCoordForPosition(character->getPosition());
 
 		if (map->getBoundingBox().containsPoint(projectile->getPosition())) {
 
@@ -168,12 +192,19 @@ void Collisions::projCollision(cocos2d::Vector<cocos2d::Sprite *> *_projectiles)
 				projectilesToDelete.pushBack(projectile);
 			}
 		}
+
+		if (!strcmp(type, "projTurret") && projCoord == charCoord) { 
+			
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/explosionturret.mp3");
+			*hp -= 10; 
+			projectilesToDelete.pushBack(projectile);
+		}
 	}
 
 	for (Sprite *projectile : projectilesToDelete) {
 
-		_projectiles->eraseObject(projectile);
+		projectiles->eraseObject(projectile);
 		map->removeChild(projectile);
 	}
-		projectilesToDelete.clear();
+	projectilesToDelete.clear();
 }

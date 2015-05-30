@@ -12,7 +12,7 @@ Scene* LoadScene::createScene()
 
 	// 'layer' is an autorelease object
 	auto layer = LoadScene::create();
-
+	
 	// add layer as a child to scene
 	scene->addChild(layer);
 
@@ -28,7 +28,7 @@ bool LoadScene::init() {
 		return false;
 	}
 
-	auto visibleSize = Director::getInstance()->getVisibleSize();
+	auto visibleSize = Director::getInstance()->getWinSize();
 
 	logo = Sprite::create("logo/logo.png");
 	logo->setScale(0.2f);
@@ -43,6 +43,9 @@ bool LoadScene::init() {
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/plasmagun.mp3");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/emptyclip.mp3");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/pickupammo.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/punch.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/explosionturret.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/heal.mp3");
 
 	// Preload textures
 	SpriteFrameCache* cache = SpriteFrameCache::getInstance();
@@ -50,10 +53,11 @@ bool LoadScene::init() {
 	cache->addSpriteFramesWithFile("flash/gunflash.plist");
 	cache->addSpriteFramesWithFile("guns/guns.plist");
 	cache->addSpriteFramesWithFile("projectiles/projectiles.plist");
+	cache->addSpriteFramesWithFile("effects/plasma.plist");
 
 	auto labelContinue = Label::createWithSystemFont("Press any key to continue", "Arial", 15);
 
-	labelContinue->setPosition(Vec2(logo->getPosition().x, logo->getPosition().y - 200));
+	labelContinue->setPosition(Vec2(logo->getPosition().x, visibleSize.height / 4));
 
 	this->addChild(labelContinue);
 

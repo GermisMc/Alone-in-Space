@@ -37,6 +37,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
         glview = GLViewImpl::create("Alone On Space");
         director->setOpenGLView(glview);
     }
+
+	Director::getInstance()->getOpenGLView()->setDesignResolutionSize(960, 640, ResolutionPolicy::NO_BORDER); // Multiresolution
 	Director::getInstance()->setProjection(Director::Projection::_2D);
     // turn on display FPS
     //director->setDisplayStats(true);
