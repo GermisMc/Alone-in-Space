@@ -7,6 +7,8 @@
 #include "Animations.h"
 #include "Projectile.h"
 #include "Guns.h"
+#include "Gui.h"
+#include "GameWin.h"
 
 using namespace cocos2d;
 
@@ -14,19 +16,25 @@ class GameScene : public cocos2d::Layer
 {
 private:
 
-	char *currentTexture;
+	char *currentGunTexture;
 
+	int running;
 	int ammorevolver;
 	int ammoplasmagun;
 	int hp;
+	int card;
 
 	TMXLayer *openDoor;
+	TMXLayer *wall;
 
+	// Notice objects
 	Enemies *enemies;
 	Collisions *collisions;
 	Animations *anim;
 	Projectile *projectile;
 	Guns *gun;
+	Gui *gui;
+	GameWin *gamewin;
 public:
 
 	cocos2d::Vector<cocos2d::Sprite *> _projectiles;
@@ -36,14 +44,11 @@ public:
 
 	TMXTiledMap *map;
 
-	TMXLayer *wall;
-
 	Sprite *character;
 	Sprite *flash;
+	Sprite *emotion;
 
 	EventKeyboard::KeyCode currentKey;
-	
-	int running;
 	
     // there's no 'id' in cpp, so we recommend returning the class instance pointer
     static cocos2d::Scene *createScene();
@@ -68,7 +73,13 @@ public:
 
 	void updtMoving(float dt);
 
-	void updtDoor(float dt);
+	void gameOverAction();
+
+	void gameWin();
+
+	void emotions();
+
+	void emotionsDone();
     
     // implement the "static create()" method manually
 	CREATE_FUNC(GameScene);

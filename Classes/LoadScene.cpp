@@ -46,14 +46,15 @@ bool LoadScene::init() {
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/punch.mp3");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/explosionturret.mp3");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/heal.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/wasted.mp3");
 
 	// Preload textures
 	SpriteFrameCache* cache = SpriteFrameCache::getInstance();
 	cache->addSpriteFramesWithFile("characters/chabi.plist");
 	cache->addSpriteFramesWithFile("flash/gunflash.plist");
-	cache->addSpriteFramesWithFile("guns/guns.plist");
 	cache->addSpriteFramesWithFile("projectiles/projectiles.plist");
 	cache->addSpriteFramesWithFile("effects/plasma.plist");
+	cache->addSpriteFramesWithFile("gui/revolver.plist");
 
 	auto labelContinue = Label::createWithSystemFont("Press any key to continue", "Arial", 15);
 

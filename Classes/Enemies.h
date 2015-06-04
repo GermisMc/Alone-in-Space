@@ -26,6 +26,7 @@ private:
 
 	cocos2d::Vector<cocos2d::Sprite *> _visibleEnemies;
 	cocos2d::Vector<cocos2d::Sprite *> _enemies;
+	cocos2d::Vector<cocos2d::Sprite *> _turrets;
 	cocos2d::Vector<cocos2d::Sprite *> *_projectiles;
 	cocos2d::Vector<cocos2d::Sprite *> *_projTurret;
 
@@ -58,13 +59,19 @@ public:
 
 	void projExplosion(Sprite *projectile);
 
-	void turretProjectile();
+	void turretProjectile(Sprite *target);
+
+	void turretProjReady();
+
+	void turretProjDone();
 
 	void projectileMoveFinished(cocos2d::Node *pSender);
 
 	void enemyCollisionCharacter();
 
 	void delayAttackEnemy(float dt);
+
+	void gameOverEnemy();
 
 	double slowDownEnemy(Sprite *enemy);
 

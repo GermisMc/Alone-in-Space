@@ -68,26 +68,46 @@ void Enemies::animateTurret(Sprite *turret) {
 
 	auto actionMove = RotateTo::create(rotateDuration, cocosAngle);
 	auto actionMoveDone = CallFuncN::create(CC_CALLBACK_1(Enemies::turretMoveFinished, this));
-	auto turretact = CallFunc::create(CC_CALLBACK_0(Enemies::turretProjectile, this));
 
 	turret->runAction(Sequence::create(actionMove, actionMoveDone, NULL));
-
-	if (distance < activeDistance) {
-
-		Enemies::turretProjectile();
-	}
 }
 
-void Enemies::turretProjectile() {
+void Enemies::turretProjReady() {
+
+	for (Sprite *target : _turrets) {
+
+		Point charPos = character->getPosition();
+		Point turrPos = target->getPosition();
+
+		float distance = turrPos.getDistance(charPos);
+		float activeDistance = 400;
+
+		if (distance < activeDistance) {
+
+			Enemies::turretProjectile(target);
+		}
+	}
+	auto turretProjDone = CallFuncN::create(CC_CALLBACK_0(Enemies::turretProjDone, this));
+	auto delay = DelayTime::create(1);
+
+	turret->runAction(Sequence::createWithTwoActions(delay, turretProjDone));
+}
+
+void Enemies::turretProjDone() {
+
+	this->turretProjReady();
+}
+
+void Enemies::turretProjectile(Sprite *target) {
 
 	auto projectile = Sprite::create("projectiles/turret.png");
-	projectile->setPosition(turret->getPosition()); 
+	projectile->setPosition(target->getPosition());
 
 	map->addChild(projectile, 5);
 
 	int realX;
 
-	auto diff = character->getPosition() - turret->getPosition();
+	auto diff = character->getPosition() - target->getPosition();
 
 	if (diff.x > 0) {
 
@@ -164,6 +184,7 @@ void Enemies::addTurretAtPos(Point position) {
 	this->animateTurret(turret);
 	
 	_enemies.pushBack(turret);
+	_turrets.pushBack(turret);
 }
 
 void Enemies::enemyOnScreen() {
@@ -292,6 +313,7 @@ void Enemies::projCollisionEnemy() {
 		for (Sprite *target : targetsToDelete) {
 
 			_enemies.eraseObject(target);
+			_turrets.eraseObject(target);
 			map->removeChild(target);
 		}
 
@@ -378,6 +400,26 @@ void Enemies::projExplosion(Sprite *projectile) {
 	auto sequence = Sequence::create(animate, delay, callback, nullptr);
 
 	explosion->runAction(sequence);
+}
+
+void Enemies::gameOverEnemy() {
+
+	cocos2d::Vector<Sprite*> targetsToDelete;
+
+	for (Sprite *target : _enemies) {
+
+		targetsToDelete.pushBack(target);
+	}
+
+	for (Sprite *projectile : targetsToDelete) {
+
+		_projectiles->eraseObject(projectile);
+
+		map->removeChild(projectile);
+	}
+	targetsToDelete.clear();
+
+	CocosDenshion::SimpleAudioEngine::getInstance()->unloadEffect("sounds/punch.mp3");
 }
 
 double Enemies::slowDownEnemy(Sprite *enemy) {

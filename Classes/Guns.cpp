@@ -15,8 +15,10 @@ void Guns::gunRender(EventKeyboard::KeyCode currentKey, char *guntexture) {
 	auto actionTo1 = RotateTo::create(0, 0, 180);
 	auto actionTo2 = RotateTo::create(0, 0, 0);
 
-	gun = Sprite::createWithSpriteFrameName(guntexture);
+	gun = Sprite::create(guntexture);
+
 	character->addChild(gun, -5);
+
 	gun->setPosition(-5, 15);
 
 	switch (currentKey) {

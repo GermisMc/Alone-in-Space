@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" nextobjectid="68">
+ <tileset firstgid="1" name="SpaceShip" tilewidth="32" tileheight="32">
+  <image source="../spaceship/armature/base_0.png" width="512" height="512"/>
+  <terraintypes>
+   <terrain name="Новый участок" tile="-1"/>
+  </terraintypes>
+  <tile id="45">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="105">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="106">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+  <tile id="107">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="121">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="122">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+  <tile id="123">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="173">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+  <tile id="174">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+  <tile id="189">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+  <tile id="190">
+   <properties>
+    <property name="opening" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="257" name="ammo" tilewidth="32" tileheight="32">
+  <image source="../projectiles/ammo.png" width="800" height="32"/>
+  <tile id="15">
+   <properties>
+    <property name="type" value="revolver"/>
+   </properties>
+  </tile>
+  <tile id="16">
+   <properties>
+    <property name="type" value="plasmagun"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="282" name="items" tilewidth="32" tileheight="32">
+  <image source="../items/items.png" width="2848" height="32"/>
+  <tile id="2">
+   <properties>
+    <property name="type" value="card"/>
+   </properties>
+  </tile>
+  <tile id="7">
+   <properties>
+    <property name="type" value="hp"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="floor" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJzVmumR2zAMheGVG7C1DWjlBhyr/xbSQTYVbFxBNtSM3vgzDMYHbR0/MIQgkATAxwOUKjNbJ6qGcpXoDc/k/bN0WSeSSTeSUXeTaJuoTvSOMtcX7fZ1cnrr4T37Ub/sP5JJN5JRt0n0kahNtENJXW+f2vJ1cjFhXemqX/YfyaQbyai7T/Qj0SFRh5K63g+1Jd3ce5X0zeuyf/Hepn1GFul2Gd1VEGe9lz0by2Mw8pNtkWe8vS3kvxL9SXS8g98EY+rtaSyP7XUgY1vkaWvv/N9UfD+Jb4LYaN7Khr3lsf0eyHJx/p3oV6LPF/DeB8XU25PDa4SRvv7X0I+nRzBzD+9jyvmxtv9jO1pvnomZe/hoXOgH30Vj6uu/Cj/X+Ght5fOr8fAs3vvRx5Vr0FQ4uZeP9gA+T4WTe3m/B1S2TFz59aa25eGqx5Rfb/w8nwNmrvE8N9OfpeGK+xjnO/14BR5+PrlN7mOc75wfU2PmFp62c75XA0V+bTPyqXHFs63mR52xvx70VYfrXBSvsdar/WBjTzwftoGdke3XxmNMjO3sMgc/2OX5JMqXKIviNRauVnbKfWnfauC3oGgc5oIrfyZhXi7bOR+o65+nxJU/k8iPxs7XJY+rSDYlrqK8tLYTrnL3BpFsLrhqYCPlJfG6hofPG3Ru4Ykrrb0HJy+J1xS44vygvCRe3wUxeBRXHXj5URXG61gQg0dxRV5n396nkngdC2LwKK7Ia5zawngdC2LwCO/3Q43HoTBeY+EqurvyZ60l4Cr33aAZfFwVxmssXEU5Lb/3bQrjNRaulHv4ceEevwRc8TsGvwsyR1wCrvgdg/Oj9FvXFPtgN8Q/yj+Wsl4xP6cfKqvCeI25Xu1AGgOeS+aKK+0Lb8N4dCB/vurHY064ol3+XwjdNfCfC76fE6583sf8e2vn32uVn2ts5oQr2rW387sQ3ifo+wfPiaW4ekP7WzutKbWdx9LPzejfIp7JeRelOyjmUj4/556/sct7RX8/x5LUQq41xd/B5O5oVFInGgPeT6/t8j7I/5vD92ynQXs7Rx+Qd3Z5H9MGMvrfBjrkozvp3L820b8Nakc6Og90juS7/xeCdZjPSY920G7KWjv3U3H4BxXgYUc=
+  </data>
+ </layer>
+ <layer name="items" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJzt1bENADAIA0GyBw37L8kCEaKMorvqJ7AjAAAAgN/luTfAK8o2wYofBwAAgFkDi3MAeg==
+  </data>
+ </layer>
+ <layer name="ammo" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJztxaENADAIADD4AP5/Fo1EbmlNIwAAAADgrnIP/KVzDwAAAPCCAUR/AEc=
+  </data>
+ </layer>
+ <layer name="wall" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJztVwkKAjEM7Bv2IT5MfIH4eBF2QaRHkpmkqXRgUbbNMd1pmpaysbGRDTfDMwvMvKJ5tHJF8/DkoVlnBg8vfWl8suJb9Mhc40gePW2jezWah8aXhktmHtd/JMf7+fswxEbm1OZJNNea8zzHX505Wi0zNVLjgSJawzVfGXlIv8e39lfm0dO+BZr8IvaaNw+rv1rtXIWHpHay8/H+HlH2H7sDjM3IA7X/p++RCVl4MO92M3pmT3/s/o91Dmoh8SvliuiW1T+h586sGqTxsxqPlq+VePR8rcjj9/5yvT9Kvzep2WljM9HqP6120lpbG0fWRRpDO0cyLu3nPfsSBg8pNg98DpuHpd/JyKP13vs8H9Ujlq4ieIzqkRSaXLV1LkJXknzQO0IUD0YuiC1zn4+A8kD2WK+WWh4EM2NvbGTEG+VCSVk=
+  </data>
+ </layer>
+ <layer name="open_door" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJzt1kEKgCAQBVDPX51AO2yzaOHaIp14Dz66FBmGXwoAAH+yRfbIMfshD9VIi5yzH0IamWe/dfd6n2b/W5nnp2d3AgDkMNo/V+uto/3z7d662r+M0uchP/sIANZwATkpGB8=
+  </data>
+ </layer>
+ <layer name="closed_door" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJzt18ENgCAQBMDr1xLsSTvQ1nz41wSRQ5n58mBDLmQvAgBgLEt2gEq2i7OpWYp3zUn3jjAjf2X2ecL8wGnNDlDJnh0AAG6U9s/eemtp/6zdW3t7l1L6PHyf/4hs9nqAiAOpLQv/
+  </data>
+ </layer>
+ <objectgroup name="Objects">
+  <object id="9" name="SpawnPoint" x="791.35" y="834.933" width="58" height="13"/>
+ </objectgroup>
+ <objectgroup name="Enemies">
+  <object id="45" name="EnemyPosition" x="243" y="349.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="46" name="EnemyPosition" x="788" y="216.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="47" name="EnemyPosition" x="1359" y="288.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="48" name="EnemyPosition" x="1337" y="984.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="49" name="EnemyPosition" x="1121" y="1395.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="50" name="EnemyPosition" x="761" y="1205.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="51" name="EnemyPosition" x="392" y="1431.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="52" name="EnemyPosition" x="199" y="1147.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="53" name="EnemyPosition" x="272" y="903.5" width="28" height="27">
+   <properties>
+    <property name="Enemy" value="1"/>
+   </properties>
+  </object>
+  <object id="59" name="TurretPosition" x="120" y="955" width="29" height="28">
+   <properties>
+    <property name="Turret" value="1"/>
+   </properties>
+  </object>
+  <object id="66" name="TurretPosition" x="505.5" y="1238" width="29" height="28">
+   <properties>
+    <property name="Turret" value="1"/>
+   </properties>
+  </object>
+  <object id="67" name="TurretPosition" x="190.5" y="1264" width="29" height="28">
+   <properties>
+    <property name="Turret" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

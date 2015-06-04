@@ -13,6 +13,7 @@ private:
 	int *ammorevolver;
 	int *ammoplasmagun;
 	int *hp;
+	int *card;
 
 	TMXTiledMap *map;
 
@@ -24,7 +25,7 @@ private:
 	TMXLayer *items;
 public:
 
-	Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun, int *hp);
+	Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun, int *hp, int *card);
 
 	bool checkBorder(Point position);
 
@@ -34,7 +35,7 @@ public:
 
 	void pickAmmo(Point tileCoord);
 
-	void pickHp(Point tileCoord);
+	void pickItems(Point tileCoord);
 
 	void projCollision(cocos2d::Vector<cocos2d::Sprite *> *_projectiles, cocos2d::Vector<cocos2d::Sprite *> *_projTurret);
 

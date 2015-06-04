@@ -1,5 +1,8 @@
 #include "GameScene.h"
-#include "SimpleaudioEngine.h"
+#include "SimpleAudioEngine.h"
+#include "Gui.h"
+#include "GameWin.h"
+#include <ctime>
 
 USING_NS_CC;
 
@@ -13,6 +16,12 @@ Scene* GameScene::createScene()
 
     // add layer as a child to scene
     scene->addChild(layer);
+
+	// Init Gui scene
+	Gui *gui = new Gui();
+	gui->init();
+	scene->addChild(gui);
+	layer->gui = gui;
 	
     // return the scene
     return scene;
@@ -27,13 +36,14 @@ bool GameScene::init()
     {
         return false;
     }
-
+	
 	// Default
 	ammoplasmagun = 0;
 	ammorevolver = 0;
+	card = 0;
 	hp = 100;
-	currentTexture = "plasmagun.png";
-
+	currentGunTexture = "guns/plasmagun.png";
+	
 	// Create character
 	character = Sprite::create("characters/backward0.png");
 
@@ -50,7 +60,7 @@ bool GameScene::init()
 	objectGroup = map->getObjectGroup("Objects");
 
 	// Init Collisions
-	collisions = new Collisions(map, character, wall, &ammorevolver, &ammoplasmagun, &hp);
+	collisions = new Collisions(map, character, wall, &ammorevolver, &ammoplasmagun, &hp, &card);
 	GameScene::addChild(collisions);
 
 	// Init Animations
@@ -70,18 +80,27 @@ bool GameScene::init()
 	enemies = new Enemies(character, map, wall, &_projectiles, &ammoplasmagun, &_projTurret, &hp);
 	GameScene::addChild(enemies);
 	enemies->spawnEnemy();
-
+	enemies->turretProjReady();
+	
 	// Init gun
 	gun = new Guns(character, map, &flash);
 	GameScene::addChild(gun);
-	gun->gunRender(currentKey, "plasmagun.png");
+	gun->gunRender(currentKey, "guns/plasmagun.png");
+
+	// Init GameWin scene
+	gamewin = new GameWin();
+
+	// Init Emotions
+	emotion = Sprite::create("emotions/emotion0.png");
+	map->addChild(emotion, 15);
+	GameScene::emotions();
 
 	// Init touch
 	auto listener = EventListenerTouchOneByOne::create();
 	listener->onTouchBegan = [&](Touch *touch, Event *event)->bool {return true; };
 	listener->onTouchEnded = CC_CALLBACK_2(GameScene::onTouchEnded, this);
 	this->_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-
+	
 	GameScene::keyboardSupport();
 
 	this->scheduleUpdate();
@@ -90,13 +109,21 @@ bool GameScene::init()
 }
 
 void GameScene::update(float dt) {
-
+	
 	GameScene::setViewPointCenter(character->getPosition());
+	GameScene::gameOverAction();
+	GameScene::gameWin();
+
 	enemies->enemyOnScreen();
 	enemies->projCollisionEnemy();
 	enemies->enemyCollisionCharacter();
 	enemies->spawnerTimer();
+	
 	collisions->projCollision(&_projectiles, &_projTurret);
+
+	gui->countGui(&ammorevolver, &ammoplasmagun, &hp, &card);
+
+	emotion->setPosition(character->getPosition().x, character->getPosition().y + 30);
 }
 
 void GameScene::updtMoving(float dt) {
@@ -190,7 +217,7 @@ void GameScene::keyboardSupport() {
 
 	eventListener->onKeyPressed = [=](EventKeyboard::KeyCode keyCode, Event* event){
 
-		gun->gunRender(keyCode, currentTexture);
+		gun->gunRender(keyCode, currentGunTexture);
 	
 		switch (keyCode) {
 
@@ -312,19 +339,124 @@ void GameScene::shots(Touch *touch) {
 
 	if (ammoplasmagun > 0) {
 
-		gun->gunRender(currentKey, "plasmagun.png");
+		gun->gunRender(currentKey, "guns/plasmagun.png");
 		gun->flashRender();
+
 		projectile->projectileLogic(touch, "projplasmagun.png", "sounds/plasmagun.mp3");
+
 		ammoplasmagun--;
 	}
 	else if (ammorevolver > 0) {
 
-		gun->gunRender(currentKey, "revolver.png");
+		gun->gunRender(currentKey, "guns/revolver.png");
 		gun->flashRender();
+
 		projectile->projectileLogic(touch, "projrevolver.png", "sounds/revolver.mp3");
+
 		ammorevolver--;
 	}
 	else { CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/emptyclip.mp3"); }
+}
+
+void GameScene::gameOverAction() {
+
+	if (hp <= 0) {
+
+		auto winSize = Director::getInstance()->getWinSize();
+
+		character->stopAllActions();
+
+		CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
+
+		this->unschedule(schedule_selector(GameScene::updtMoving));
+		this->unscheduleUpdate();
+
+		enemies->gameOverEnemy();
+
+		gui->gameOver(&hp, character, &card);
+
+		auto eventListener = EventListenerKeyboard::create();
+
+		eventListener->onKeyPressed = [=](EventKeyboard::KeyCode keyCode, Event* event) {
+
+			auto labelRestart = Label::createWithSystemFont("wait to restart...", "Arial", 20);
+
+			labelRestart->setPosition(Vec2(winSize.width / 2, winSize.height / 6));
+
+			gui->addChild(labelRestart);
+
+			auto delay = DelayTime::create(2.5f);
+			auto callback = CallFunc::create([=]() {
+
+				auto scene = GameScene::createScene();
+
+				Director::getInstance()->replaceScene(scene);
+			});
+
+			auto sequence = Sequence::createWithTwoActions(delay, callback);
+
+			this->runAction(sequence);
+		};
+
+		this->_eventDispatcher->addEventListenerWithSceneGraphPriority(eventListener, this);
+	}
+}
+
+void GameScene::gameWin() {
+
+	auto gameWin = objectGroup->getObject("gameWin");
+
+	int x = gameWin["x"].asInt();
+	int y = gameWin["y"].asInt();
+	int width = gameWin["width"].asInt();
+	int height = gameWin["height"].asInt();
+
+	auto gameWinRect = Rect(x, y, width, height);
+
+	if ((gameWinRect.containsPoint(character->getPosition())) && (card = 10)) {
+		
+		auto scene = GameWin::createScene();
+		gamewin->resultCards(&card);
+		Director::getInstance()->replaceScene(scene);
+		gamewin->resultCards(&card);
+	}
+}
+
+void GameScene::emotions() {
+
+	auto showEmotion = CallFunc::create([=]() {
+
+		
+		emotion->setLocalZOrder(15);
+		
+		
+	});
+
+	auto removeEmotion = CallFunc::create([=]() {
+
+
+		emotion->setLocalZOrder(-5);
+
+
+	});
+
+	auto emotionsDone = CallFunc::create(CC_CALLBACK_0(GameScene::emotionsDone, this));
+
+	srand(time(0));
+
+	auto delay = DelayTime::create(10 + rand() % 60);
+
+	char str[100] = { 0 };
+	sprintf(str, "emotions/emotion%d.png", rand() % 6);
+
+	emotion->setTexture(str);
+
+	this->runAction(Sequence::create(removeEmotion, delay, showEmotion, delay, emotionsDone, nullptr));
+}
+
+void GameScene::emotionsDone() {
+
+	this->emotions();
 }
 
 void GameScene::menuCloseCallback(Ref* pSender)

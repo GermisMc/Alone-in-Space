@@ -2,7 +2,7 @@
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h" 
 
-Collisions::Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun, int *hp) {
+Collisions::Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun, int *hp, int *card) {
 
 	this->map = map;
 	this->character = character;
@@ -10,6 +10,7 @@ Collisions::Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int 
 	this->ammorevolver = ammorevolver;
 	this->ammoplasmagun = ammoplasmagun;
 	this->hp = hp;
+	this->card = card;
 
 	closedDoor = map->getLayer("closed_door");
 	ammo = map->getLayer("ammo");
@@ -80,7 +81,7 @@ bool Collisions::collision(Point position, EventKeyboard::KeyCode keyCode) {
 
 	Collisions::openDoors(tileCoord);
 	Collisions::pickAmmo(tileCoord);
-	Collisions::pickHp(tileCoord);
+	Collisions::pickItems(tileCoord);
 
 	return true;
 }
@@ -137,7 +138,7 @@ void Collisions::pickAmmo(Point tileCoord) {
 
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/pickupammo.mp3");
 
-				*ammorevolver += 5;
+				*ammorevolver += 7;
 
 				ammo->removeTileAt(tileCoord);
 			}
@@ -153,17 +154,32 @@ void Collisions::pickAmmo(Point tileCoord) {
 	}
 }
 
-void Collisions::pickHp(Point tileCoord) {
+void Collisions::pickItems(Point tileCoord) {
 
 	int tileGidPickHp = items->getTileGIDAt(tileCoord);
 
 	if (tileGidPickHp) {
 
-		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/heal.mp3");
+		auto properties = map->getPropertiesForGID(tileGidPickHp).asValueMap();
 
-		*hp = 100;
+		if (!properties.empty()) {
 
-		items->removeTileAt(tileCoord);
+			auto type = properties["type"].asString();
+
+			if ("hp" == type) {
+
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/heal.mp3");
+
+				*hp = 100;
+			}
+
+			if ("card" == type) {
+
+				*card += 1;
+			}
+
+			items->removeTileAt(tileCoord);
+		}
 	}
 }
 
