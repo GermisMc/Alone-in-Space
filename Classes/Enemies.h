@@ -8,10 +8,29 @@ using namespace cocos2d;
 
 class Enemies : public Node
 {
+
+public:
+
+	Enemies(Sprite *character, TMXTiledMap *map, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles, int *ammoplasmagun, cocos2d::Vector<cocos2d::Sprite *> *_projTurret, int *hp, int *priorityGun, TMXLayer *ammo);
+
+	void spawnEnemy();
+
+	void enemyOnScreen();
+
+	void projCollisionEnemy();
+
+	void spawnerTimer();
+
+	void enemyCollisionCharacter();
+
+	void gameOverEnemy();
+
+	void turretProjReady();
 private:
 	
 	int *ammoplasmagun;
 	int *hp;
+	int *priorityGun;
 
 	Sprite *character;
 	Sprite *enemy;
@@ -21,6 +40,7 @@ private:
 	TMXTiledMap *map;
 
 	TMXLayer *wall;
+	TMXLayer *ammo;
 
 	TMXObjectGroup *objectGroup;
 
@@ -31,9 +51,6 @@ private:
 	cocos2d::Vector<cocos2d::Sprite *> *_projTurret;
 
 	std::vector<cocos2d::Point> _spawnCoord;
-public:
-
-	Enemies(Sprite *character, TMXTiledMap *map, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles, int *ammoplasmagun, cocos2d::Vector<cocos2d::Sprite *> *_projTurret, int *hp);
 
 	void enemyMoveFinished(Node *pSender);
 
@@ -47,31 +64,17 @@ public:
 
 	void addTurretAtPos(Point position);
 
-	void spawnEnemy();
-
-	void enemyOnScreen();
-
-	void projCollisionEnemy();
-
 	void spawner();
-
-	void spawnerTimer();
 
 	void projExplosion(Sprite *projectile);
 
 	void turretProjectile(Sprite *target);
 
-	void turretProjReady();
-
 	void turretProjDone();
 
 	void projectileMoveFinished(cocos2d::Node *pSender);
 
-	void enemyCollisionCharacter();
-
 	void delayAttackEnemy(float dt);
-
-	void gameOverEnemy();
 
 	double slowDownEnemy(Sprite *enemy);
 

@@ -75,6 +75,8 @@ bool Gui::init() {
 
 void Gui::countGui(int *ammorevolver, int *ammoplasmagun, int *hp, int *card) {
 
+	const float GUI_FONT_SIZE = 15;
+
 	// Create count revolver label
 	this->removeChild(guiAmmoRevolver);
 
@@ -114,7 +116,7 @@ void Gui::countGui(int *ammorevolver, int *ammoplasmagun, int *hp, int *card) {
 
 	sprintf(strPlasma, "%d", *ammoplasmagun);
 
-	countPlasmaGun = Label::createWithSystemFont(strPlasma, "Arial", 15);
+	countPlasmaGun = Label::createWithSystemFont(strPlasma, "Arial", GUI_FONT_SIZE);
 
 	countPlasmaGun->setPosition(guiAmmoPlasmagun->getPosition().x + 20, guiAmmoPlasmagun->getPosition().y);
 
@@ -127,7 +129,7 @@ void Gui::countGui(int *ammorevolver, int *ammoplasmagun, int *hp, int *card) {
 
 	sprintf(strHealth, "%d%%", *hp);
 
-	countHealth = Label::createWithSystemFont(strHealth, "Arial", 15);
+	countHealth = Label::createWithSystemFont(strHealth, "Arial", GUI_FONT_SIZE);
 
 	countHealth->setPosition(health->getPosition().x + 40, health->getPosition().y);
 
@@ -140,7 +142,7 @@ void Gui::countGui(int *ammorevolver, int *ammoplasmagun, int *hp, int *card) {
 
 	sprintf(strCard, "%d/10", *card);
 
-	countCard = Label::createWithSystemFont(strCard, "Arial", 15);
+	countCard = Label::createWithSystemFont(strCard, "Arial", GUI_FONT_SIZE);
 
 	countCard->setPosition(guiCard->getPosition().x + 40, guiCard->getPosition().y);
 
@@ -148,6 +150,15 @@ void Gui::countGui(int *ammorevolver, int *ammoplasmagun, int *hp, int *card) {
 }
 
 void Gui::gameOver(int *hp, Sprite *character, int *card) {
+
+	const float RGBA_RED = 192;
+	const float RGBA_GREEN = 192;
+	const float RGBA_BLUE = 192;
+	const float RGBA_ALPHA = 0.04f;
+
+	const int ACTION_TIME_DRAW = 25;
+	const int FONT_SIZE_WASTED = 100;
+	const int OUTLINE_SIZE_WASTED = 5;
 
 	auto visibleSize = Director::getInstance()->getWinSize();
 
@@ -161,19 +172,21 @@ void Gui::gameOver(int *hp, Sprite *character, int *card) {
 
 		blackout = DrawNode::create();
 
-		blackout->drawSolidRect(Vec2(0, 0), Vec2(visibleSize.width, visibleSize.height), Color4F(192, 192, 192, 0.04f));
+		blackout->drawSolidRect(Vec2(0, 0), Vec2(visibleSize.width, visibleSize.height), Color4F(RGBA_RED, RGBA_GREEN, RGBA_BLUE, RGBA_ALPHA));
 
 		addChild(blackout);
 	});
 
 	auto sequenceDraw = Sequence::createWithTwoActions(delayDraw, callbackDraw);
 
-	this->runAction(Repeat::create(sequenceDraw, 25));
+	this->runAction(Repeat::create(sequenceDraw, ACTION_TIME_DRAW));
 
 	auto delayWasted = DelayTime::create(2.5f);
 	auto callbackWasted = CallFunc::create([=]() {
 
-		wasted = Label::createWithTTF("WASTED", "fonts/pricedown bl.ttf", 100);
+		wasted = Label::createWithTTF("WASTED", "fonts/pricedown bl.ttf", FONT_SIZE_WASTED);
+
+		wasted->enableOutline(Color4B::BLACK, OUTLINE_SIZE_WASTED);
 
 		wasted->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 1.5));
 

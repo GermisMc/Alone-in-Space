@@ -1,16 +1,19 @@
 #include "Enemies.h"
 #include "cocos2d.h"
 #include "SimpleaudioEngine.h"
+#include <ctime>
 
-Enemies::Enemies(Sprite* character, TMXTiledMap *map, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles, int *ammoplasmagun, cocos2d::Vector<cocos2d::Sprite *> *_projTurret, int *hp) {
+Enemies::Enemies(Sprite* character, TMXTiledMap *map, TMXLayer *wall, cocos2d::Vector<cocos2d::Sprite *> *_projectiles, int *ammoplasmagun, cocos2d::Vector<cocos2d::Sprite *> *_projTurret, int *hp, int *priorityGun, TMXLayer *ammo) {
 
 	this->character = character;
 	this->map = map;
 	this->wall = wall;
+	this->ammo = ammo;
 	this->_projectiles = _projectiles;
 	this->_projTurret = _projTurret;
 	this->ammoplasmagun = ammoplasmagun;
 	this->hp = hp;
+	this->priorityGun = priorityGun;
 }
 
 void Enemies::enemyMoveFinished(Node *pSender) {
@@ -21,8 +24,12 @@ void Enemies::enemyMoveFinished(Node *pSender) {
 
 void Enemies::animateEnemy(Sprite *enemy) {
 
-	auto actionTo1 = RotateTo::create(0, 0, 180);
-	auto actionTo2 = RotateTo::create(0, 0, 0);
+	const int ROTATE_DURATION = 0;
+	const int ROTATE_ANGLE_X = 0;
+	const int ROTATE_ANGLE_Y = 0;
+
+	auto actionTo1 = RotateTo::create(ROTATE_DURATION, ROTATE_ANGLE_X, ROTATE_ANGLE_Y + 180);
+	auto actionTo2 = RotateTo::create(ROTATE_DURATION, ROTATE_ANGLE_X, ROTATE_ANGLE_Y);
 	auto diff = Point(character->getPosition() - enemy->getPosition());
 
 	if (diff.x < 0) {
@@ -100,10 +107,12 @@ void Enemies::turretProjDone() {
 
 void Enemies::turretProjectile(Sprite *target) {
 
+	const int LOCAL_Z_ORDER_PROJ = 5;
+
 	auto projectile = Sprite::create("projectiles/turret.png");
 	projectile->setPosition(target->getPosition());
 
-	map->addChild(projectile, 5);
+	map->addChild(projectile, LOCAL_Z_ORDER_PROJ);
 
 	int realX;
 
@@ -148,11 +157,13 @@ void Enemies::projectileMoveFinished(Node *pSender) {
 
 void Enemies::addEnemyAtPos(Point position) {
 
+	const int LOCAL_Z_ORDER_ENEMY = 10;
+
 	Point charPos = character->getPosition();
 
 	auto winSize = Director::getInstance()->getWinSize();
 
-	enemy = Sprite::create("enemies/gost.png");
+	enemy = Sprite::createWithSpriteFrameName("gost.png");
 
 	enemy->setPosition(position);
 
@@ -168,18 +179,20 @@ void Enemies::addEnemyAtPos(Point position) {
 		_visibleEnemies.pushBack(enemy);
 	}
 
-	map->addChild(enemy, 10);
+	map->addChild(enemy, LOCAL_Z_ORDER_ENEMY);
 
 	_enemies.pushBack(enemy);
 }
 
 void Enemies::addTurretAtPos(Point position) {
 
-	turret = Sprite::create("enemies/turret.png");
+	const int LOCAL_Z_ORDER_TURRET = 10;
+
+	turret = Sprite::createWithSpriteFrameName("turret.png");
 
 	turret->setPosition(position);
 	turret->setName("turret");
-	map->addChild(turret, 10);
+	map->addChild(turret, LOCAL_Z_ORDER_TURRET);
 
 	this->animateTurret(turret);
 	
@@ -275,6 +288,10 @@ void Enemies::spawner() {
 
 void Enemies::projCollisionEnemy() {
 
+	const int REVOLVER_AMMO_ID = 272;
+	const int PLASMAGUN_AMMO_ID = 273;
+	const int HEALTH_ID = 289;
+
 	cocos2d::Vector<Sprite*> projectilesToDelete;
 
 	for (Sprite *projectile : *_projectiles) {
@@ -297,15 +314,37 @@ void Enemies::projCollisionEnemy() {
 
 			if (projectileRect.intersectsRect(targetRect)) {
 
-				if (target->getName() == "turret" && *ammoplasmagun == 0) {
+				if (target->getName() == "turret" && *priorityGun != 0) {
 
 					break;
 				}
 				else { targetsToDelete.pushBack(target); }
 
-				if (*ammoplasmagun > 0) {
+				if (*priorityGun == 0) {
 
 					Enemies::projExplosion(projectile);
+				}
+				auto gameType = UserDefault::getInstance()->getStringForKey("gameType", "classic");
+
+				if ("arena" == gameType) {
+
+					srand(time(0));
+
+					if (rand() % 100 < 30) {
+
+						// Drop revolver ammo 30%
+						ammo->setTileGID(REVOLVER_AMMO_ID, tileCoordForPosition(target->getPosition()));
+					}
+					else if (rand() % 100 < 15) {
+
+						// Drop plasmagun ammo 15%
+						ammo->setTileGID(PLASMAGUN_AMMO_ID, tileCoordForPosition(target->getPosition()));
+					}
+					else if (rand() % 100 < 5) {
+
+						// Drop health 5%
+						ammo->setTileGID(HEALTH_ID, tileCoordForPosition(target->getPosition()));
+					}
 				}
 			}
 		}
@@ -318,6 +357,7 @@ void Enemies::projCollisionEnemy() {
 		}
 
 		if (targetsToDelete.size() > 0) {
+
 			// add the projectile to the list of ones to remove
 			projectilesToDelete.pushBack(projectile);
 		}
@@ -333,6 +373,8 @@ void Enemies::projCollisionEnemy() {
 }
 
 void Enemies::enemyCollisionCharacter() {
+
+	const int SHEDULE_INTERVAL = 1;
 
 	auto characterRect = Rect(
 		character->getPositionX() - character->getContentSize().width / 2,
@@ -350,7 +392,7 @@ void Enemies::enemyCollisionCharacter() {
 
 		if (targetRect.intersectsRect(characterRect)) {
 			
-			this->schedule(schedule_selector(Enemies::delayAttackEnemy), 1);
+			this->schedule(schedule_selector(Enemies::delayAttackEnemy), SHEDULE_INTERVAL);
 		}
 	}
 }
@@ -366,7 +408,11 @@ void Enemies::delayAttackEnemy(float dt) {
 void Enemies::projExplosion(Sprite *projectile) {
 
 	const float EXPLOSION_SPEED = 0.08f;
+	const float DELAY_ANIMATION = 0.4f;
+
 	const char *EXPLOSION_NAME = "explosion";
+
+	const int LOCAL_Z_ORDER_EXPLOSION = 15;
 
 	SpriteFrameCache* cache = SpriteFrameCache::getInstance();
 
@@ -381,11 +427,11 @@ void Enemies::projExplosion(Sprite *projectile) {
 		animFrames.pushBack(frame);
 	}
 
-	Animation* animation = Animation::createWithSpriteFrames(animFrames, 0.4f);
+	Animation* animation = Animation::createWithSpriteFrames(animFrames, DELAY_ANIMATION);
 
 	explosion = Sprite::createWithSpriteFrameName("explosion0.png");
 
-	map->addChild(explosion, 15, EXPLOSION_NAME);
+	map->addChild(explosion, LOCAL_Z_ORDER_EXPLOSION, EXPLOSION_NAME);
 
 	explosion->setPosition(projectile->getPosition());
 

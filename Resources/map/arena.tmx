@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="25" height="25" tilewidth="32" tileheight="32" nextobjectid="1">
+ <tileset firstgid="1" name="station" tilewidth="32" tileheight="32">
+  <image source="../spaceship/armature/base_0.png" width="512" height="512"/>
+ </tileset>
+ <layer name="floor" width="25" height="25">
+  <data encoding="base64" compression="zlib">
+   eJzt0DERACAUw9Di3+MHBYACoBYYumXIXeZXkrobrkI/3XI7+Mddp5b7lA9WWGGFFVZYYYXV7z/inAY1
+  </data>
+ </layer>
+</map>

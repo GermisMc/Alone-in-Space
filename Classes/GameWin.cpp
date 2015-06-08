@@ -27,9 +27,14 @@ bool GameWin::init() {
 		return false;
 	}
 
+	const int FONT_SIZE_THANKS = 20;
+	const int FONT_SIZE_COPYRIGHT = 15;
+	const int COPYRIGHT_POS_X = 15;
+	const int COPYRIGHT_POS_Y = 15;
+
 	CocosDenshion::SimpleAudioEngine::getInstance()->stopAllEffects();
 
-	//CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("music/final.mp3", true);
+	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("music/acdc.mp3", true);
 
 	auto visibleSize = Director::getInstance()->getWinSize();
 
@@ -39,28 +44,18 @@ bool GameWin::init() {
 
 	this->addChild(background);
 
-	cards = Sprite::create("gui/card.png");
+	labelThanks = Label::createWithSystemFont("Thank you for a well played game!", "Arial", FONT_SIZE_THANKS);
+	copyRight = Label::createWithSystemFont("Author Nikita Klimenko \n2015 All rights reserved.", "Arial", FONT_SIZE_COPYRIGHT);
 
-	cards->setPosition(visibleSize.width / 2, visibleSize.height - 50);
+	copyRight->setAnchorPoint(Vec2(0, 0));
 
-	this->addChild(cards);
+	labelThanks->setPosition(visibleSize.width / 2, visibleSize.height - 45);
+	copyRight->setPosition(COPYRIGHT_POS_X, COPYRIGHT_POS_Y);
 
-	labelCards = Label::createWithSystemFont("0", "Arial", 15);
-
-	labelCards->setPosition(cards->getPosition().x + 20, cards->getPosition().y);
-
-	this->addChild(labelCards);
+	this->addChild(labelThanks);
+	this->addChild(copyRight);
 
 	return true;
-}
-
-void GameWin::resultCards(int *card) {
-
-	auto visibleSize = Director::getInstance()->getWinSize();
-
-	char str[100] = { 0 };
-
-	sprintf(str, "%d", *card);
 }
 
 void GameWin::menuCloseCallback(Ref* pSender)

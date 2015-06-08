@@ -2,29 +2,35 @@
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h" 
 
-Collisions::Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun, int *hp, int *card) {
+Collisions::Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun, int *hp, int *card, TMXLayer *ammo) {
 
 	this->map = map;
 	this->character = character;
 	this->wall = wall;
+	this->ammo = ammo;
 	this->ammorevolver = ammorevolver;
 	this->ammoplasmagun = ammoplasmagun;
 	this->hp = hp;
 	this->card = card;
 
 	closedDoor = map->getLayer("closed_door");
-	ammo = map->getLayer("ammo");
 	items = map->getLayer("items");
 }
 
 bool Collisions::checkBorder(Point position) {
 
-	if ((position.x < (map->getMapSize().width * map->getTileSize().width) - 12 &&
-		position.y < (map->getMapSize().height * map->getTileSize().height) - 12 &&
-		position.y > 18 &&
-		position.x > 12))
+	const int MARGIN_WIGHT_MAP = 12;
+	const int MARGIN_HEIGHT_MAP = 12;
+	const int MARGIN_MAP_X = 12;
+	const int MARGIN_MAP_Y = 18;
+
+	if ((position.x < (map->getMapSize().width * map->getTileSize().width) - MARGIN_WIGHT_MAP &&
+		position.y < (map->getMapSize().height * map->getTileSize().height) - MARGIN_HEIGHT_MAP &&
+		position.y > MARGIN_MAP_X &&
+		position.x > MARGIN_MAP_Y))
 	{
 		return true;
+
 		// The black hole effect
 		//character->setPosition((map->getMapSize().width * map->getTileSize().width) - playerPos.x, (map->getMapSize().height * map->getTileSize().height) - playerPos.y);
 	} else {
@@ -44,7 +50,7 @@ bool Collisions::collision(Point position, EventKeyboard::KeyCode keyCode) {
 
 	Point tileCoord;
 	Point charSize = character->getContentSize();
-
+	
 	switch (keyCode) {
 
 	case EventKeyboard::KeyCode::KEY_A:
@@ -62,7 +68,7 @@ bool Collisions::collision(Point position, EventKeyboard::KeyCode keyCode) {
 	}
 
 	int tileGidWall = wall->getTileGIDAt(tileCoord);
-
+	
 	if (tileGidWall) {
 
 		auto properties = map->getPropertiesForGID(tileGidWall).asValueMap();

@@ -10,6 +10,10 @@ Guns::Guns(Sprite *character, TMXTiledMap *map, Sprite **flash) {
 
 void Guns::gunRender(EventKeyboard::KeyCode currentKey, char *guntexture) {
 
+	const int LOCAL_Z_ORDER_GUN = 5;
+	const int GUN_POS_X = -5;
+	const int GUN_POS_Y = 15;
+
 	this->currentKey = currentKey;
 
 	auto actionTo1 = RotateTo::create(0, 0, 180);
@@ -17,9 +21,9 @@ void Guns::gunRender(EventKeyboard::KeyCode currentKey, char *guntexture) {
 
 	gun = Sprite::create(guntexture);
 
-	character->addChild(gun, -5);
+	character->addChild(gun, -LOCAL_Z_ORDER_GUN);
 
-	gun->setPosition(-5, 15);
+	gun->setPosition(GUN_POS_X, GUN_POS_Y);
 
 	switch (currentKey) {
 
@@ -30,7 +34,7 @@ void Guns::gunRender(EventKeyboard::KeyCode currentKey, char *guntexture) {
 
 		gun->runAction(actionTo2);
 
-		character->addChild(gun, 5);
+		character->addChild(gun, LOCAL_Z_ORDER_GUN);
 
 		break;
 
@@ -40,9 +44,9 @@ void Guns::gunRender(EventKeyboard::KeyCode currentKey, char *guntexture) {
 		character->removeAllChildren();
 
 		gun->runAction(actionTo1);
-		gun->setPosition(30, 15);
+		gun->setPosition(GUN_POS_X + 35, GUN_POS_Y);
 
-		character->addChild(gun, 5);
+		character->addChild(gun, LOCAL_Z_ORDER_GUN);
 
 		break;
 
@@ -52,9 +56,9 @@ void Guns::gunRender(EventKeyboard::KeyCode currentKey, char *guntexture) {
 		character->removeAllChildren();
 
 		gun->runAction(actionTo2);
-		gun->setPosition(-5, 15);
+		gun->setPosition(GUN_POS_X, GUN_POS_Y);
 
-		character->addChild(gun, -5);
+		character->addChild(gun, -LOCAL_Z_ORDER_GUN);
 
 		break;
 
@@ -64,9 +68,9 @@ void Guns::gunRender(EventKeyboard::KeyCode currentKey, char *guntexture) {
 		character->removeAllChildren();
 
 		gun->runAction(actionTo1);
-		gun->setPosition(30, 15);
+		gun->setPosition(GUN_POS_X + 35, GUN_POS_Y);
 
-		character->addChild(gun, 5);
+		character->addChild(gun, LOCAL_Z_ORDER_GUN);
 
 		break;
 	}
@@ -75,7 +79,11 @@ void Guns::gunRender(EventKeyboard::KeyCode currentKey, char *guntexture) {
 void Guns::flashRender() {
 
 	const float FLASH_SPEED = 0.08f;
+	const float DELAY_ANIMATION = 0.2f;
+
 	const char *FLASH_NAME = "flash";
+
+	const int LOCAL_Z_ORDER_FLASH = 15;
 
 	SpriteFrameCache* cache = SpriteFrameCache::getInstance();
 
@@ -90,11 +98,11 @@ void Guns::flashRender() {
 		animFrames.pushBack(frame);
 	}
 
-	Animation* animation = Animation::createWithSpriteFrames(animFrames, 0.2f);
+	Animation* animation = Animation::createWithSpriteFrames(animFrames, DELAY_ANIMATION);
 
 	*flash = Sprite::createWithSpriteFrameName("gunflash0.png");
 
-	map->addChild(*flash, 15, FLASH_NAME);
+	map->addChild(*flash, LOCAL_Z_ORDER_FLASH, FLASH_NAME);
 
 	(*flash)->setPosition(Vec2(character->getPosition().x - gun->getContentSize().width - 5, character->getPosition().y));
 

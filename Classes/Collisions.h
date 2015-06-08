@@ -7,6 +7,16 @@ using namespace cocos2d;
 
 class Collisions : public cocos2d::Node
 {
+
+public:
+
+	Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun, int *hp, int *card, TMXLayer *ammo);
+
+	bool checkBorder(Point position);
+
+	bool collision(Point position, EventKeyboard::KeyCode keyCode);
+
+	void projCollision(cocos2d::Vector<cocos2d::Sprite *> *_projectiles, cocos2d::Vector<cocos2d::Sprite *> *_projTurret);
 private:
 
 
@@ -23,21 +33,12 @@ private:
 	TMXLayer *closedDoor;
 	TMXLayer *ammo;
 	TMXLayer *items;
-public:
-
-	Collisions(TMXTiledMap *map, Sprite *character, TMXLayer *wall, int *ammorevolver, int *ammoplasmagun, int *hp, int *card);
-
-	bool checkBorder(Point position);
-
-	bool collision(Point position, EventKeyboard::KeyCode keyCode);
 
 	void openDoors(Point tileCoord);
 
 	void pickAmmo(Point tileCoord);
 
 	void pickItems(Point tileCoord);
-
-	void projCollision(cocos2d::Vector<cocos2d::Sprite *> *_projectiles, cocos2d::Vector<cocos2d::Sprite *> *_projTurret);
 
 	void projCollisionLogic(cocos2d::Vector<cocos2d::Sprite *> *projectiles, char *type);
 

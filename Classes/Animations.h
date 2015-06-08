@@ -7,14 +7,15 @@ using namespace cocos2d;
 
 class Animations
 {
-private:
 
-	Sprite *character;
 public:
 
 	Animations(Sprite *character);
-	
+
 	void movAnim(char *anim_direct, int frames_num);
+private:
+
+	Sprite *character;
 };
 
 #endif // __ANIMATION_H__

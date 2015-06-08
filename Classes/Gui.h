@@ -7,21 +7,7 @@ using namespace cocos2d;
 
 class Gui : public cocos2d::Layer
 {
-private:
 
-	bool test = true;
-
-	DrawNode *blackout;
-
-	Label *countPlasmaGun;
-	Label *countHealth;
-	Label *wasted;
-	Label *countCard;
-
-	Sprite *guiAmmoPlasmagun;
-	Sprite *guiAmmoRevolver;
-	Sprite *guiCard;
-	Sprite *health;
 public:
 
 	void countGui(int *ammorevolver, int *ammoplasmagun, int *hp, int *card);
@@ -39,6 +25,21 @@ public:
 
 	// implement the "static create()" method manually
 	CREATE_FUNC(Gui);
+private:
+
+	bool test = true;
+
+	DrawNode *blackout;
+
+	Label *countPlasmaGun;
+	Label *countHealth;
+	Label *wasted;
+	Label *countCard;
+
+	Sprite *guiAmmoPlasmagun;
+	Sprite *guiAmmoRevolver;
+	Sprite *guiCard;
+	Sprite *health;
 };
 
 #endif // __GUI_H__

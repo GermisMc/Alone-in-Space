@@ -28,6 +28,9 @@ bool LoadScene::init() {
 		return false;
 	}
 
+	const int FONT_SIZE_CLASSIC = 25;
+	const int CLASSIC_POS_X = 300;
+
 	auto visibleSize = Director::getInstance()->getWinSize();
 
 	logo = Sprite::create("logo/logo.png");
@@ -47,6 +50,7 @@ bool LoadScene::init() {
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/explosionturret.mp3");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/heal.mp3");
 	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sounds/wasted.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadBackgroundMusic("music/acdc.mp3");
 
 	// Preload textures
 	SpriteFrameCache* cache = SpriteFrameCache::getInstance();
@@ -55,28 +59,52 @@ bool LoadScene::init() {
 	cache->addSpriteFramesWithFile("projectiles/projectiles.plist");
 	cache->addSpriteFramesWithFile("effects/plasma.plist");
 	cache->addSpriteFramesWithFile("gui/revolver.plist");
+	cache->addSpriteFramesWithFile("enemies/enemies.plist");
 
-	auto labelContinue = Label::createWithSystemFont("Press any key to continue", "Arial", 15);
+	classic = Label::createWithSystemFont("Classic mode", "Arial", FONT_SIZE_CLASSIC);
 
-	labelContinue->setPosition(Vec2(logo->getPosition().x, visibleSize.height / 4));
+	classic->setPosition(CLASSIC_POS_X, visibleSize.height / 4);
 
-	this->addChild(labelContinue);
 
-	// Blinking
-	auto actionBlink = RepeatForever::create(Blink::create(4, 3));
-	labelContinue->runAction(actionBlink);
+	arena = Label::createWithSystemFont("Arena", "Arial", 25);
 
-	auto eventListener = EventListenerKeyboard::create();
+	arena->setPosition(visibleSize.width - 300, visibleSize.height / 4);
 
-	eventListener->onKeyPressed = [=](EventKeyboard::KeyCode keyCode, Event* event) {
+	this->addChild(classic);
+	this->addChild(arena);
+	
 
-		auto scene = GameScene::createScene();
+	auto selectGame = EventListenerTouchOneByOne::create();
 
-		Director::getInstance()->replaceScene(scene);
+	selectGame->onTouchBegan = [=](Touch *touch, Event *event) -> bool {
+
+		if (classic->getBoundingBox().containsPoint(touch->getLocation())) {
+
+			UserDefault::getInstance()->setStringForKey("selectedMap", "map/map.tmx");
+			UserDefault::getInstance()->setStringForKey("gameType", "classic");
+
+			auto game = GameScene::createScene();
+			Director::getInstance()->replaceScene(game);
+
+			return true;
+		}
+		if (arena->getBoundingBox().containsPoint(touch->getLocation())) {
+
+			UserDefault::getInstance()->setStringForKey("selectedMap", "map/backup.tmx");
+			UserDefault::getInstance()->setStringForKey("gameType", "arena");
+
+			auto game = GameScene::createScene();
+			Director::getInstance()->replaceScene(game);
+
+			return true;
+		}
+		return false;
 	};
 
-	this->_eventDispatcher->addEventListenerWithSceneGraphPriority(eventListener, this);
+	selectGame->setSwallowTouches(true);
 
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(selectGame, this);
+	
 	return true;
 }
 

@@ -7,6 +7,12 @@ using namespace cocos2d;
 
 class Projectile : public Node
 {
+
+public:
+
+	Projectile(Sprite *character, TMXTiledMap *map, cocos2d::Vector<cocos2d::Sprite *> *_projectiles, Sprite **flash);
+
+	void projectileLogic(Touch *touch, char *proj, char *projsound);
 private:
 
 	Sprite *character;
@@ -15,13 +21,8 @@ private:
 	TMXTiledMap *map;
 
 	cocos2d::Vector<cocos2d::Sprite *> *_projectiles;
-public:
-
-	Projectile(Sprite *character, TMXTiledMap *map, cocos2d::Vector<cocos2d::Sprite *> *_projectiles, Sprite **flash);
 
 	void projectileMoveFinished(cocos2d::Node *pSender);
-
-	void projectileLogic(Touch *touch, char *proj, char *projsound);
 };
 
 #endif // __PROJECTILE_H__

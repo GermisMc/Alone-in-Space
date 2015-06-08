@@ -7,18 +7,17 @@ using namespace cocos2d;
 
 class GameWin : public cocos2d::Layer
 {
-private:
 
-	Label *labelCards;
-
-	Sprite *background;
-	Sprite *cards;
 public:
-
-	void resultCards(int *card);
 
 	// there's no 'id' in cpp, so we recommend returning the class instance pointer
 	static cocos2d::Scene *createScene();
+private:
+
+	Label *labelThanks;
+	Label *copyRight;
+
+	Sprite *background;
 
 	// Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
 	bool init();

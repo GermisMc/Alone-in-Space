@@ -8,6 +8,10 @@ Animations::Animations(cocos2d::Sprite *character) {
 
 void Animations::movAnim(char *anim_direct, int frames_num)  {
 
+	const int TAG_ANIMATE = 15;
+
+	const float DELAY_ANIMATION = 0.2f;
+
 	SpriteFrameCache* cache = SpriteFrameCache::getInstance();
 
 	Vector<SpriteFrame*> animFrames(15);
@@ -20,6 +24,10 @@ void Animations::movAnim(char *anim_direct, int frames_num)  {
 		animFrames.pushBack(frame);
 	}
 
-	Animation* animation = Animation::createWithSpriteFrames(animFrames, 0.2f);
-	character->runAction(RepeatForever::create(Animate::create(animation)));
+	Animation* animation = Animation::createWithSpriteFrames(animFrames, DELAY_ANIMATION);
+
+	auto animate = RepeatForever::create(Animate::create(animation));
+	animate->setTag(TAG_ANIMATE);
+
+	character->runAction(animate);
 }

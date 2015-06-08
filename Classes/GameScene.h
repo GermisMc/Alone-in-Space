@@ -9,23 +9,35 @@
 #include "Guns.h"
 #include "Gui.h"
 #include "GameWin.h"
+#include "LoadScene.h"
 
 using namespace cocos2d;
 
 class GameScene : public cocos2d::Layer
 {
+
+public:
+	// there's no 'id' in cpp, so we recommend returning the class instance pointer
+	static cocos2d::Scene *createScene();
 private:
 
+	enum priority { plasmagun, revolver };
+
 	char *currentGunTexture;
+
+	std::string gameType;
 
 	int running;
 	int ammorevolver;
 	int ammoplasmagun;
 	int hp;
 	int card;
+	int priorityGun;
+	int score = 0;
 
 	TMXLayer *openDoor;
 	TMXLayer *wall;
+	TMXLayer *ammo;
 
 	// Notice objects
 	Enemies *enemies;
@@ -35,7 +47,7 @@ private:
 	Guns *gun;
 	Gui *gui;
 	GameWin *gamewin;
-public:
+	LoadScene *load;
 
 	cocos2d::Vector<cocos2d::Sprite *> _projectiles;
 	cocos2d::Vector<cocos2d::Sprite *> _projTurret;
@@ -49,15 +61,12 @@ public:
 	Sprite *emotion;
 
 	EventKeyboard::KeyCode currentKey;
-	
-    // there's no 'id' in cpp, so we recommend returning the class instance pointer
-    static cocos2d::Scene *createScene();
 
-    // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
-    bool init();
-    
-    // a selector callback
-    void menuCloseCallback(cocos2d::Ref *pSender);
+	// Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
+	bool init();
+
+	// a selector callback
+	void menuCloseCallback(cocos2d::Ref *pSender);
 
 	void keyboardSupport();
 
@@ -80,8 +89,10 @@ public:
 	void emotions();
 
 	void emotionsDone();
-    
-    // implement the "static create()" method manually
+
+	void ScoreArena();
+
+	// implement the "static create()" method manually
 	CREATE_FUNC(GameScene);
 };
 

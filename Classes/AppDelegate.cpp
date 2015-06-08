@@ -34,7 +34,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     auto director = Director::getInstance();
     auto glview = director->getOpenGLView();
     if(!glview) {
-        glview = GLViewImpl::create("Alone On Space");
+        glview = GLViewImpl::create("Alone In Space");
         director->setOpenGLView(glview);
     }
 

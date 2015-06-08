@@ -21,6 +21,8 @@ void Projectile::projectileMoveFinished(Node *pSender) {
 
 void Projectile::projectileLogic(Touch *touch, char *proj, char *projsound) {
 
+	const int LOCAL_Z_ORDER_PROJ = 10;
+
 	auto touchLocation = touch->getLocation();
 	touchLocation = map->convertToNodeSpace(touchLocation);
 
@@ -29,7 +31,7 @@ void Projectile::projectileLogic(Touch *touch, char *proj, char *projsound) {
 
 	CocosDenshion::SimpleAudioEngine::getInstance()->playEffect(projsound);
 
-	map->addChild(projectile, 10);
+	map->addChild(projectile, LOCAL_Z_ORDER_PROJ);
 
 	int realX;
 

@@ -36,6 +36,9 @@ bool GameScene::init()
     {
         return false;
     }
+
+	const int LOCAL_Z_ORDER_CHARACTER = 10;
+	const int LOCAL_Z_ORDER_EMOTIONS = 15;
 	
 	// Default
 	ammoplasmagun = 0;
@@ -43,24 +46,29 @@ bool GameScene::init()
 	card = 0;
 	hp = 100;
 	currentGunTexture = "guns/plasmagun.png";
+	priorityGun = plasmagun;
 	
 	// Create character
 	character = Sprite::create("characters/backward0.png");
 
 	// Create tile map
-	map = TMXTiledMap::create("map/map.tmx");
+	std::string selectedMap = UserDefault::getInstance()->getStringForKey("selectedMap");
+
+	map = TMXTiledMap::create(selectedMap);
+	map->addChild(character, LOCAL_Z_ORDER_CHARACTER);
 	this->addChild(map);
-	map->addChild(character, 10);
 
 	wall = map->getLayer("wall");
 	openDoor = map->getLayer("open_door");
+	ammo = map->getLayer("ammo");
+
 	openDoor->setLocalZOrder(20);
 
 	// Create objects 
 	objectGroup = map->getObjectGroup("Objects");
 
 	// Init Collisions
-	collisions = new Collisions(map, character, wall, &ammorevolver, &ammoplasmagun, &hp, &card);
+	collisions = new Collisions(map, character, wall, &ammorevolver, &ammoplasmagun, &hp, &card, ammo);
 	GameScene::addChild(collisions);
 
 	// Init Animations
@@ -77,7 +85,7 @@ bool GameScene::init()
 	character->setPosition(x + map->getTileSize().width / 2, y + map->getTileSize().height / 2);
 
 	// Init Enemies
-	enemies = new Enemies(character, map, wall, &_projectiles, &ammoplasmagun, &_projTurret, &hp);
+	enemies = new Enemies(character, map, wall, &_projectiles, &ammoplasmagun, &_projTurret, &hp, &priorityGun, ammo);
 	GameScene::addChild(enemies);
 	enemies->spawnEnemy();
 	enemies->turretProjReady();
@@ -92,8 +100,11 @@ bool GameScene::init()
 
 	// Init Emotions
 	emotion = Sprite::create("emotions/emotion0.png");
-	map->addChild(emotion, 15);
+	map->addChild(emotion, LOCAL_Z_ORDER_EMOTIONS);
 	GameScene::emotions();
+
+	// Init Arena Scores
+	GameScene::ScoreArena();
 
 	// Init touch
 	auto listener = EventListenerTouchOneByOne::create();
@@ -197,11 +208,7 @@ void GameScene::centerProcessingMove(EventKeyboard::KeyCode keyCode, float dt) {
 		break;
 	}
 
-	if (isNotCrossBorder && isNotCollide) {
-
-		character->setPosition(nextCoord);
-
-	} else {
+	if (!(isNotCrossBorder && isNotCollide)) {
 
 		character->stopAllActions();
 		CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
@@ -210,12 +217,31 @@ void GameScene::centerProcessingMove(EventKeyboard::KeyCode keyCode, float dt) {
 
 void GameScene::keyboardSupport() {
 
+	const int TAG_FORWARD = 8;
+	const int TAG_RIGHT = 6;
+	const int TAG_BACKWARD = 2;
+	const int TAG_LEFT = 4;
+	const int TAG_ANIMATE = 15;
+	const int FRAME_NUM_ANIMATION = 3;
+
 	running = CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/running.mp3", true);
 	CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
 
 	auto eventListener = EventListenerKeyboard::create();
 
 	eventListener->onKeyPressed = [=](EventKeyboard::KeyCode keyCode, Event* event){
+
+		auto actionMoveForward = RepeatForever::create(cocos2d::MoveBy::create(1, cocos2d::Vec2(0, 80)));
+		actionMoveForward->setTag(TAG_FORWARD);
+
+		auto actionMoveRight = RepeatForever::create(cocos2d::MoveBy::create(1, cocos2d::Vec2(80, 0)));
+		actionMoveRight->setTag(TAG_RIGHT);
+
+		auto actionMoveBackward = RepeatForever::create(cocos2d::MoveBy::create(1, cocos2d::Vec2(0, -80)));
+		actionMoveBackward->setTag(TAG_BACKWARD);
+
+		auto actionMoveLeft = RepeatForever::create(cocos2d::MoveBy::create(1, cocos2d::Vec2(-80, 0)));
+		actionMoveLeft->setTag(TAG_LEFT);
 
 		gun->gunRender(keyCode, currentGunTexture);
 	
@@ -224,9 +250,11 @@ void GameScene::keyboardSupport() {
 		case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
 		case EventKeyboard::KeyCode::KEY_A:
 
-			anim->movAnim("left%d.png", 3);
+			anim->movAnim("left%d.png", FRAME_NUM_ANIMATION);
 
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+
+			character->runAction(actionMoveLeft);
 
 			currentKey = EventKeyboard::KeyCode::KEY_A;
 
@@ -236,9 +264,11 @@ void GameScene::keyboardSupport() {
 		case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 		case EventKeyboard::KeyCode::KEY_D:
 
-			anim->movAnim("right%d.png", 3);
+			anim->movAnim("right%d.png", FRAME_NUM_ANIMATION);
 
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+
+			character->runAction(actionMoveRight);
 
 			currentKey = EventKeyboard::KeyCode::KEY_D;
 
@@ -248,9 +278,11 @@ void GameScene::keyboardSupport() {
 		case EventKeyboard::KeyCode::KEY_UP_ARROW:
 		case EventKeyboard::KeyCode::KEY_W:
 
-			anim->movAnim("backward%d.png", 2);
+			anim->movAnim("backward%d.png", FRAME_NUM_ANIMATION - 1);
 
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+
+			character->runAction(actionMoveForward);
 
 			currentKey = EventKeyboard::KeyCode::KEY_W;
 
@@ -260,13 +292,32 @@ void GameScene::keyboardSupport() {
 		case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
 		case EventKeyboard::KeyCode::KEY_S:
 
-			anim->movAnim("forward%d.png", 3);
+			anim->movAnim("forward%d.png", FRAME_NUM_ANIMATION);
 
 			CocosDenshion::SimpleAudioEngine::getInstance()->resumeEffect(running);
+
+			character->runAction(actionMoveBackward);
 
 			currentKey = EventKeyboard::KeyCode::KEY_S;
 
 			this->schedule(schedule_selector(GameScene::updtMoving));
+
+			break;
+
+		case EventKeyboard::KeyCode::KEY_SPACE:
+
+			if (priorityGun == plasmagun) {
+
+				priorityGun = revolver;
+
+				currentGunTexture = "guns/revolver.png";
+
+			} else {
+
+				priorityGun = plasmagun;
+
+				currentGunTexture = "guns/plasmagun.png";
+			}
 
 			break;
 		}
@@ -279,48 +330,40 @@ void GameScene::keyboardSupport() {
 		case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
 		case EventKeyboard::KeyCode::KEY_A:
 
-			character->stopAllActions();
-
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
 
-			this->unschedule(schedule_selector(GameScene::updtMoving));
-
+			character->stopActionByTag(TAG_ANIMATE);
+			character->stopActionByTag(TAG_LEFT);
 			character->setTexture("characters/left0.png");
 
 			break;
 		case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
 		case EventKeyboard::KeyCode::KEY_D:
 
-			character->stopAllActions();
-
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
 
-			this->unschedule(schedule_selector(GameScene::updtMoving));
-
+			character->stopActionByTag(TAG_ANIMATE);
+			character->stopActionByTag(TAG_RIGHT);
 			character->setTexture("characters/right0.png");
 
 			break;
 		case EventKeyboard::KeyCode::KEY_UP_ARROW:
 		case EventKeyboard::KeyCode::KEY_W:
 
-			character->stopAllActions();
-
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
 
-			this->unschedule(schedule_selector(GameScene::updtMoving));
-
+			character->stopActionByTag(TAG_ANIMATE);
+			character->stopActionByTag(TAG_FORWARD);
 			character->setTexture("characters/backward0.png");
 
 			break;
 		case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
 		case EventKeyboard::KeyCode::KEY_S:
 
-			character->stopAllActions();
-
 			CocosDenshion::SimpleAudioEngine::getInstance()->pauseEffect(running);
 
-			this->unschedule(schedule_selector(GameScene::updtMoving));
-
+			character->stopActionByTag(TAG_ANIMATE);
+			character->stopActionByTag(TAG_BACKWARD);
 			character->setTexture("characters/forward0.png");
 
 			break;
@@ -337,28 +380,48 @@ void GameScene::onTouchEnded(Touch *touch, Event *event) {
 
 void GameScene::shots(Touch *touch) {
 
-	if (ammoplasmagun > 0) {
+	switch (priorityGun) {
 
-		gun->gunRender(currentKey, "guns/plasmagun.png");
-		gun->flashRender();
+	case plasmagun:
 
-		projectile->projectileLogic(touch, "projplasmagun.png", "sounds/plasmagun.mp3");
+		if (ammoplasmagun > 0) {
 
-		ammoplasmagun--;
+			gun->gunRender(currentKey, "guns/plasmagun.png");
+			gun->flashRender();
+
+			projectile->projectileLogic(touch, "projplasmagun.png", "sounds/plasmagun.mp3");
+
+			currentGunTexture = "guns/plasmagun.png";
+
+			ammoplasmagun--;
+
+		} else { CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/emptyclip.mp3"); }
+
+		break;
+
+	case revolver:
+
+		if (ammorevolver > 0) {
+
+			gun->gunRender(currentKey, "guns/revolver.png");
+			gun->flashRender();
+
+			projectile->projectileLogic(touch, "projrevolver.png", "sounds/revolver.mp3");
+
+			currentGunTexture = "guns/revolver.png";
+
+			ammorevolver--;
+
+		} else { CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/emptyclip.mp3"); }
+
+		break;
 	}
-	else if (ammorevolver > 0) {
-
-		gun->gunRender(currentKey, "guns/revolver.png");
-		gun->flashRender();
-
-		projectile->projectileLogic(touch, "projrevolver.png", "sounds/revolver.mp3");
-
-		ammorevolver--;
-	}
-	else { CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sounds/emptyclip.mp3"); }
 }
 
 void GameScene::gameOverAction() {
+
+	const int FONT_SIZE_RESTART = 20;
+	const int FONT_SIZE_SCORE = 40;
 
 	if (hp <= 0) {
 
@@ -370,7 +433,8 @@ void GameScene::gameOverAction() {
 
 		this->unschedule(schedule_selector(GameScene::updtMoving));
 		this->unscheduleUpdate();
-
+		this->stopAllActions();
+		
 		enemies->gameOverEnemy();
 
 		gui->gameOver(&hp, character, &card);
@@ -379,7 +443,7 @@ void GameScene::gameOverAction() {
 
 		eventListener->onKeyPressed = [=](EventKeyboard::KeyCode keyCode, Event* event) {
 
-			auto labelRestart = Label::createWithSystemFont("wait to restart...", "Arial", 20);
+			auto labelRestart = Label::createWithSystemFont("wait to restart...", "Arial", FONT_SIZE_RESTART);
 
 			labelRestart->setPosition(Vec2(winSize.width / 2, winSize.height / 6));
 
@@ -398,7 +462,38 @@ void GameScene::gameOverAction() {
 			this->runAction(sequence);
 		};
 
+		if ("arena" == gameType) {
+
+			int *tmp = &score;
+
+			char str[100] = { 0 };
+			sprintf(str, "%d", *tmp);
+		
+			auto labelScore = Label::createWithSystemFont(str, "Arial", FONT_SIZE_SCORE);
+
+			labelScore->setPosition(Vec2(winSize.width / 2, winSize.height - 100));
+
+			gui->addChild(labelScore);
+		}
+
 		this->_eventDispatcher->addEventListenerWithSceneGraphPriority(eventListener, this);
+	}
+}
+
+void GameScene::ScoreArena() {
+
+	gameType =  UserDefault::getInstance()->getStringForKey("gameType", "classic");
+
+	if ("arena" == gameType) {
+	
+		auto scoreCounter = CallFunc::create([&]() {
+
+			score++;
+		});
+
+		auto delay = DelayTime::create(1);
+
+		this->runAction(RepeatForever::create(Sequence::createWithTwoActions(scoreCounter, delay)));
 	}
 }
 
@@ -413,41 +508,38 @@ void GameScene::gameWin() {
 
 	auto gameWinRect = Rect(x, y, width, height);
 
-	if ((gameWinRect.containsPoint(character->getPosition())) && (card = 10)) {
-		
+	if ((gameWinRect.containsPoint(character->getPosition())) && (card == 10)) {
+
 		auto scene = GameWin::createScene();
-		gamewin->resultCards(&card);
+
 		Director::getInstance()->replaceScene(scene);
-		gamewin->resultCards(&card);
 	}
 }
 
 void GameScene::emotions() {
 
+	const int DELAY_TIME_MIN = 10;
+	const int DELAY_TIME_MAX = 60;
+	const int FRAME_NUM_EMOTIONS = 6;
+
 	auto showEmotion = CallFunc::create([=]() {
 
-		
 		emotion->setLocalZOrder(15);
-		
-		
 	});
 
 	auto removeEmotion = CallFunc::create([=]() {
 
-
 		emotion->setLocalZOrder(-5);
-
-
 	});
 
 	auto emotionsDone = CallFunc::create(CC_CALLBACK_0(GameScene::emotionsDone, this));
 
 	srand(time(0));
 
-	auto delay = DelayTime::create(10 + rand() % 60);
+	auto delay = DelayTime::create(DELAY_TIME_MIN + rand() % DELAY_TIME_MAX);
 
 	char str[100] = { 0 };
-	sprintf(str, "emotions/emotion%d.png", rand() % 6);
+	sprintf(str, "emotions/emotion%d.png", rand() % FRAME_NUM_EMOTIONS + 1);
 
 	emotion->setTexture(str);
 
