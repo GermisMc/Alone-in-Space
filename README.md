@@ -1,24 +1,24 @@
-+# About the project
-+
-+## Description
-+The project was carried out as a course project, but gained so much more.
-+
-+Сюжет игры построен вокруг персонажа под именем Chabi. Chabi – это машинно-человеческий гибрид, по сути являющимся киборгом. Работающий на космической станции вместе с людьми. В один момент на станции произошла авария, в результате которой выжил только главный герой, а станцию населили враждебные существа. Цель Chabi добраться до спасательного шаттла и покинуть станцию.
-+
-+## Licensing
-+Copyright © 2015 Klimenko Nikita .
-+<p>This product is licensed. The license described in the file License.
-+
-+## To build:
-+
-+###Windows:
-+
-+####Prerequisites:
-+* Installed cocos2d-x v3.4 http://cocos2d-x.org/programmersguide/////////G/index.html
-+* Installed python 2.7
-+
-+####Build:
-+* Create folder for project
-+* Copy files from Classes/ and Resources/ of this repo to corresponding folders
-+* Open project with help of .sln file in /proj.win32/
-+* Compile it in VS
+# About the project
+
+## Description
+The project was carried out as a course project, but gained so much more.
+
+РЎСЋР¶РµС‚ РёРіСЂС‹ РїРѕСЃС‚СЂРѕРµРЅ РІРѕРєСЂСѓРі РїРµСЂСЃРѕРЅР°Р¶Р° РїРѕРґ РёРјРµРЅРµРј Chabi. Chabi - СЌС‚Рѕ РјР°С€РёРЅРЅРѕ-С‡РµР»РѕРІРµС‡РµСЃРєРёР№ РіРёР±СЂРёРґ, РїРѕ СЃСѓС‚Рё СЏРІР»СЏСЋС‰РёРјСЃСЏ РєРёР±РѕСЂРіРѕРј, СЂР°Р±РѕС‚Р°СЋС‰РёР№ РЅР° РєРѕСЃРјРёС‡РµСЃРєРѕР№ СЃС‚Р°РЅС†РёРё РІРјРµСЃС‚Рµ СЃ Р»СЋРґСЊРјРё. Р’ РѕРґРёРЅ РјРѕРјРµРЅС‚ РЅР° СЃС‚Р°РЅС†РёРё РїСЂРѕРёР·РѕС€Р»Р° Р°РІР°СЂРёСЏ, РІ СЂРµР·СѓР»СЊС‚Р°С‚Рµ РєРѕС‚РѕСЂРѕР№ РІС‹Р¶РёР» С‚РѕР»СЊРєРѕ РіР»Р°РІРЅС‹Р№ РіРµСЂРѕР№, Р° СЃС‚Р°РЅС†РёСЋ РЅР°СЃРµР»РёР»Рё РІСЂР°Р¶РґРµР±РЅС‹Рµ СЃСѓС‰РµСЃС‚РІР°. С†РµР»СЊ Chabi РґРѕР±СЂР°С‚СЊСЃСЏ РґРѕ СЃРїР°СЃР°С‚РµР»СЊРЅРѕРіРѕ С€Р°С‚С‚Р»Р° Рё РїРѕРєРёРЅСѓС‚СЊ СЃС‚Р°РЅС†РёСЋ.
+
+## Licensing
+Copyright В© 2015 Klimenko Nikita .
+<p>This product is licensed. The license described in the file License.
+
+## To build:
+
+###Windows:
+
+####Prerequisites:
+* Installed cocos2d-x v3.4 http://cocos2d-x.org/programmersguide/////////G/index.html
+* Installed python 2.7
+
+####Build:
+* Create folder for project
+* Copy files from Classes/ and Resources/ of this repo to corresponding folders
+* Open project with help of .sln file in /proj.win32/
+* Compile it in VS
